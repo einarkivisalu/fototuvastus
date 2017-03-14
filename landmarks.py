@@ -2,8 +2,35 @@
 import os
 import dlib
 import glob
-from skimage import io
+from skimage import io, color
 
+def checkPhotoDimensions(img):
+    imageHeight = (img.shape[0])    
+    imageWidth = (img.shape[1])
+    if imageWidth >= 600 and imageHeight >= 750:
+        return True
+    else:
+        return False
+        
+#TODO    
+def is_color(img):
+    r1,g1,b1 = 0,0,0
+    if len(img.shape)==2:
+        return False
+    else:
+        imageHeight = (img.shape[0])
+        imageWidth = (img.shape[1])
+        for i in range(imageHeight):
+            for j in range(imageWidth):
+                r,g,b = img[i,j]
+                r1 += r
+                g1 += g
+                b1 += b
+        if r1 == g1 == b1:            
+            return False
+    return True
+        
+        
 def checkFaceCenterToImage(img,shape,detection):
     imageWidth = (len((img)[0]))
 #    print (detection.width()) #face rectangle width
@@ -28,7 +55,7 @@ def checkFaceVerticalAxe(shape, detection):
     else:
         return False
 
-#TODO        height of 50–70% of the total vertical length of the photo
+# height of 50–70% of the total vertical length of the photo
 def checkEyesHeight(img,shape,detection):
     leftEyeLeftPoint = shape.part(36).y
     rightEyeRightPoint = shape.part(45).y
@@ -134,6 +161,12 @@ for f in glob.glob(os.path.join(faces_folder_path, "*.jpg")):
 
     win.clear_overlay()
     win.set_image(img)
+    
+    PhotoDimensionsB = checkPhotoDimensions(img)
+    print ("Photo minimal dimensions OK: {}".format(PhotoDimensionsB))
+    
+    PhotoColorityB = is_color(img) #checkPhotoColor(img)
+    print ("Photo is color: {}".format(PhotoColorityB))    
 
     # Ask the detector to find the bounding boxes of each face. The 1 in the
     # second argument indicates that we should upsample the image 1 time. This
