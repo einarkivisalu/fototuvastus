@@ -27,6 +27,19 @@ def checkFaceVerticalAxe(shape, detection):
         return True
     else:
         return False
+
+#TODO        height of 50–70% of the total vertical length of the photo
+def checkEyesHeight(img,shape,detection):
+    leftEyeLeftPoint = shape.part(36).y
+    rightEyeRightPoint = shape.part(45).y
+    eyesHeightLine = (leftEyeLeftPoint + rightEyeRightPoint)/2
+    imageHeight = (img.shape[0])    
+    eyesHeightFactor = (1-eyesHeightLine/imageHeight)
+    if 0.5 <= eyesHeightFactor <= 0.7:
+        return True
+    else:
+        return False
+    
         
 def checkMouthClosed(shape, detection):
     upperLipY= shape.part(66).y
@@ -80,7 +93,11 @@ def checkRedEyes(shape, detection):
     return "Not checked yet"
 
 #TODO    
-def checkExtraObjects(img, detection):    
+def checkExtraObjects(img,shape,detection):
+    imageWidth = (len((img)[0]))
+    imageHeight = (len((img)[1]))
+#    print("\nImage: Width: {} Height: {}".format(imageWidth, imageHeight))
+#    print("Detection: Left: {} Top: {} Right: {} Bottom: {}".format(detection.left(), detection.top(), detection.right(), detection.bottom()))
     return "Not checked yet"
     
 def checkFaceTooSmall(img, detection):
@@ -88,18 +105,18 @@ def checkFaceTooSmall(img, detection):
     imagesizeFactor = imageWidth/detection.width()
 #    print ("imagesizeFactor: ",imagesizeFactor)
     if imagesizeFactor >=3:
-        return True
-    else:
         return False
+    else:
+        return True
         
 def checkFaceTooLarge(img, detection):
     imageWidth = (len((img)[0]))
     imagesizeFactor = imageWidth/detection.width()
 #    print ("imagesizeFactor: ",imagesizeFactor)
     if imagesizeFactor <=1.5:
-        return True
-    else:
         return False
+    else:
+        return True
 
 dir = os.path.dirname(__file__)
 print (dir)
@@ -137,23 +154,26 @@ for f in glob.glob(os.path.join(faces_folder_path, "*.jpg")):
         faceVerticalAxeB = checkFaceVerticalAxe(shape, d)
         print ("Face verticality: {}".format(faceVerticalAxeB))
         
+        eyesHeightB =checkEyesHeight(img,shape,d)
+        print ("Eyes height correct: {}".format(eyesHeightB))        
+        
         mouthClosedB = checkMouthClosed(shape, d)
         print ("Mouth is closed: {}".format(mouthClosedB))
         
         faceTooSmallB= checkFaceTooSmall(img,d)
-        print ("Face too small: {}".format(faceTooSmallB))        
+        print ("Face not small: {}".format(faceTooSmallB))        
         
         faceTooLargeB= checkFaceTooLarge(img,d)
-        print ("Face too large: {}".format(faceTooLargeB)) 
+        print ("Face not large: {}".format(faceTooLargeB)) 
         
         eyesOpendB = checkEyesOpen(shape, d)
         print ("Eyes are open: {}".format(eyesOpendB))
         
         redEyesB = checkRedEyes(shape, d)
-        print ("Red eyes detected: {}".format(redEyesB))
+        print ("Red eyes not detected: {}".format(redEyesB))
 
-        extraObjectsOnPictureB= checkExtraObjects(shape, d)
-        print ("Extra objects detected: {}".format(redEyesB))
+        extraObjectsOnPictureB= checkExtraObjects(img, shape, d)
+        print ("Extra objects not detected: {}".format(extraObjectsOnPictureB))
         
         rects = []
         dlib.find_candidate_object_locations(img, rects, min_size=10000)       
@@ -165,4 +185,4 @@ for f in glob.glob(os.path.join(faces_folder_path, "*.jpg")):
         # Draw the face landmarks on the screen.
         win.add_overlay(shape)        
     win.add_overlay(dets)    
-    input("Press Enter to continue...")
+#    input("Press Enter to continue...")
