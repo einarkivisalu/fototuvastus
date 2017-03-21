@@ -54,6 +54,19 @@ def checkFaceVerticalAxe(shape, detection):
         return True
     else:
         return False
+        
+def checkFaceStraight(shape):
+    leftSideDistance = shape.part(28).x-shape.part(1).x #Distance betveen nose and left side
+    rightSideDistance = shape.part(15).x - shape.part(28).x ##Distance betveen nose and right side
+    faceWeight = shape.part(15).x - shape.part(1).x
+    faceAssymmetry = abs(leftSideDistance - rightSideDistance)
+    faceAssymmetryConstant = 0.15    
+    faceStraightFactor = faceAssymmetry / faceWeight
+    if faceStraightFactor <= faceAssymmetryConstant:
+        return True
+    else:
+        return False
+    return "Not checked yet"
 
 # height of 50–70% of the total vertical length of the photo
 def checkEyesHeight(img,shape,detection):
@@ -186,6 +199,9 @@ for f in glob.glob(os.path.join(faces_folder_path, "*.jpg")):
         
         faceVerticalAxeB = checkFaceVerticalAxe(shape, d)
         print ("Face verticality: {}".format(faceVerticalAxeB))
+     
+        faceIsStraightB = checkFaceStraight(shape)
+        print ("Face is straight: {}".format(faceIsStraightB))
         
         eyesHeightB =checkEyesHeight(img,shape,d)
         print ("Eyes height correct: {}".format(eyesHeightB))        
@@ -218,4 +234,4 @@ for f in glob.glob(os.path.join(faces_folder_path, "*.jpg")):
         # Draw the face landmarks on the screen.
         win.add_overlay(shape)        
     win.add_overlay(dets)    
-#    input("Press Enter to continue...")
+    input("Press Enter to continue...")
