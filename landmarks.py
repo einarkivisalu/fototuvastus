@@ -2,7 +2,10 @@
 import os
 import dlib
 import glob
+import numpy as np
 from skimage import io, color
+from skimage.filters import gaussian
+from skimage.segmentation import active_contour
 
 def checkPhotoDimensions(img):
     imageHeight = (img.shape[0])    
@@ -91,35 +94,27 @@ def checkMouthClosed(shape, detection):
     else:
         return False
 
-#TODO        
+#TODO Kuna silmade detekteerimine ei ole väga hea, siis see lahendus ei toimi.
 def checkEyesOpen(shape, detection):
     leftEyeUpperOuterY = shape.part(37).y
     leftEyeUpperInnerY = shape.part(38).y
     leftEyeUpperMidY=(leftEyeUpperOuterY+leftEyeUpperInnerY)/2
-
     leftEyeLowerOuterY = shape.part(41).y
     leftEyeLowerInnerY = shape.part(40).y
     leftEyeLowerMidY=(leftEyeLowerOuterY+leftEyeLowerInnerY)/2
-
     leftEyeOpenFactor= (leftEyeLowerInnerY - leftEyeUpperInnerY)/detection.height()
-#    print("leftEyeOpenFactor: ", leftEyeOpenFactor)
-    
+#    print("leftEyeOpenFactor: ", leftEyeOpenFactor)    
     leftEyeOpenFactor2= (leftEyeLowerMidY - leftEyeUpperMidY)/detection.height()
 #    print("leftEyeOpenFactor2: ", leftEyeOpenFactor2)
-
     rightEyeUpperOuterY = shape.part(44).y
     rightEyeUpperInnerY = shape.part(43).y
     rightEyeUpperMidY=(leftEyeUpperOuterY+leftEyeUpperInnerY)/2
-
     rightEyeLowerOuterY = shape.part(46).y
     rightEyeLowerInnerY = shape.part(47).y
     rightEyeLowerMidY=(rightEyeLowerOuterY+rightEyeLowerInnerY)/2
-
     rightEyeOpenFactor= (rightEyeLowerMidY - rightEyeUpperMidY)/detection.height()
 #    print("rightEyeOpenFactor: ", rightEyeOpenFactor)
-
-#    rightEyeOpenFactor= (rightEyeLowerY - rightEyeUpperY)/detection.height()
-    
+#    rightEyeOpenFactor= (rightEyeLowerY - rightEyeUpperY)/detection.height()    
 #    print("rightEyeOpenFactor: ", rightEyeOpenFactor)
 #    if rightEyeOpenFactor <= 0.02:
 #        return True
@@ -133,9 +128,9 @@ def checkRedEyes(shape, detection):
     return "Not checked yet"
 
 #TODO    
-def checkExtraObjects(img,shape,detection):
-    imageWidth = (len((img)[0]))
-    imageHeight = (len((img)[1]))
+def checkExtraObjects(img,shape,detection):                    
+                
+#    ax.plot(init[:, 0], init[:, 1], '--r', lw=3) #piirav kontuur                    
 #    print("\nImage: Width: {} Height: {}".format(imageWidth, imageHeight))
 #    print("Detection: Left: {} Top: {} Right: {} Bottom: {}".format(detection.left(), detection.top(), detection.right(), detection.bottom()))
     return "Not checked yet"
@@ -159,11 +154,10 @@ def checkFaceTooLarge(img, detection):
         return True
 
 dir = os.path.dirname(__file__)
-print (dir)
 predictor_path = os.path.join(dir, 'shape_predictor_68_face_landmarks.dat')
 
 faces_folder_path = os.path.join(dir,'images')
-
+print (faces_folder_path)
 detector = dlib.get_frontal_face_detector()
 predictor = dlib.shape_predictor(predictor_path)
 win = dlib.image_window()
