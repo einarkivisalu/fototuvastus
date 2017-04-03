@@ -51,3 +51,4 @@ for f in glob.glob(os.path.join(faces_folder_path, "*.jpg")):
     ax.set_xticks([]), ax.set_yticks([]) #pikslite teljestik 0
     ax.axis([0, img.shape[1], img.shape[0], 0]) #pildi raam 0
 #    plt.savefig(f +'.png', bbox_inches='tight')
+
