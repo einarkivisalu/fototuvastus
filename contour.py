@@ -1,49 +1,42 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu Mar 22 20:46:21 2017
-@author: einark
-"""
-import numpy as np
-import dlib
-import os
-import matplotlib.pyplot as plt
-#from skimage.color import rgb2gray
-from skimage.filters import gaussian
-from skimage.segmentation import active_contour
-from skimage import io
+Created on Mon Apr  3 10:34:22 2017
 
+@author: Einar
+"""
+
+#import numpy as np
+import matplotlib.pyplot as plt
+from skimage import measure
+from skimage import io, color
+#import dlib
+import glob
+import os
 
 dir = os.path.dirname(__file__)
-path = os.path.join(dir, 'images', 'two_persons.jpg')#.replace("\\","/")
-img = io.imread(path)
-#img = rgb2gray(img)
 
-win = dlib.image_window()
-win.clear_overlay()
-win.set_image(img)
-detector = dlib.get_frontal_face_detector()
+faces_folder_path = os.path.join(dir,'images')
 
-dets = detector(img, 1)
-win.add_overlay(dets) 
+for f in glob.glob(os.path.join(faces_folder_path, "*.jpg")):
+    print("\nProcessing file: {}".format(f))
+    r = io.imread(f)
 
 
-s = np.linspace(0, 2*np.pi, 400)
-x = 153 + 150*np.cos(s)
-y = 200 + 200*np.sin(s)
-init = np.array([x, y]).T
-
-snake = active_contour(gaussian(img, 3),
-                       init, alpha=0.015, beta=10, gamma=0.001)
-
-#print(snake) 
-#win.add_overlay(snake)
-
-#Järgnev osa joonistab kontuuri pildile - see osa on vaja ümber teha
-fig = plt.figure(figsize=(9, 9))
-ax = fig.add_subplot(111)
-plt.gray()
-ax.imshow(img)
-#ax.plot(init[:, 0], init[:, 1], '--r', lw=3) #piirav kontuur
-ax.plot(snake[:, 0], snake[:, 1], '-b', lw=3)
-ax.set_xticks([]), ax.set_yticks([]) #pikslite teljestik 0
-ax.axis([0, img.shape[1], img.shape[0], 0]) #pildi raam 0
+#    r = io.imread(r'D:\isiklik\TTY\Meeskonnatoo\codewc\trunk\images\passportphoto-front.jpg')
+    r = color.rgb2gray(r)
+    
+    # Find contours at a constant value of 0.8
+    contours = measure.find_contours(r, 0.8)
+    
+    # Select the largest contiguous contour
+    contour = sorted(contours, key=lambda x: len(x))[-1]
+    
+    # Display the image and plot the contour
+    fig, ax = plt.subplots()
+    ax.imshow(r, interpolation='nearest', cmap=plt.cm.gray)
+    X, Y = ax.get_xlim(), ax.get_ylim()
+    ax.step(contour.T[1], contour.T[0], linewidth=2, c='b')
+    ax.set_xlim(X), ax.set_ylim(Y)
+    
+    plt.show()
+    
