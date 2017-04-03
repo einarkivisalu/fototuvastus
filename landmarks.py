@@ -2,10 +2,10 @@
 import os
 import dlib
 import glob
-import numpy as np
+#import numpy as np
 from skimage import io, color
-from skimage.filters import gaussian
-from skimage.segmentation import active_contour
+#from skimage.filters import gaussian
+#from skimage.segmentation import active_contour
 
 def checkPhotoDimensions(img):
     imageHeight = (img.shape[0])    
@@ -14,8 +14,7 @@ def checkPhotoDimensions(img):
         return True
     else:
         return False
-        
-#TODO    
+           
 def is_color(img):
     r1,g1,b1 = 0,0,0
     if len(img.shape)==2:
@@ -96,7 +95,7 @@ def checkMouthClosed(shape, detection):
 
 #TODO Kuna silmade detekteerimine ei ole väga hea, siis see lahendus ei toimi.
 def checkEyesOpen(shape, detection):
-    leftEyeUpperOuterY = shape.part(37).y
+    """    leftEyeUpperOuterY = shape.part(37).y
     leftEyeUpperInnerY = shape.part(38).y
     leftEyeUpperMidY=(leftEyeUpperOuterY+leftEyeUpperInnerY)/2
     leftEyeLowerOuterY = shape.part(41).y
@@ -119,7 +118,7 @@ def checkEyesOpen(shape, detection):
 #    if rightEyeOpenFactor <= 0.02:
 #        return True
 #    else:
-#        return False
+            return False"""
     return "Not checked yet"
 
 #TODO
@@ -218,8 +217,8 @@ for f in glob.glob(os.path.join(faces_folder_path, "*.jpg")):
         extraObjectsOnPictureB= checkExtraObjects(img, shape, d)
         print ("Extra objects not detected: {}".format(extraObjectsOnPictureB))
         
-        rects = []
-        dlib.find_candidate_object_locations(img, rects, min_size=10000)       
+#        rects = []
+#        dlib.find_candidate_object_locations(img, rects, min_size=10000)       
 #        print("number of rectangles found {}".format(len(rects))) 
 #        for k, d in enumerate(rects):
 #            print("Detection {}: Left: {} Top: {} Right: {} Bottom: {}".format(k, d.left(), d.top(), d.right(), d.bottom()))
