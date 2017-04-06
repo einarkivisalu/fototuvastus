@@ -14,9 +14,9 @@ from skimage.segmentation import active_contour
 from skimage import io
 
 
-dir = os.path.dirname(__file__)
-path = os.path.join(dir, 'images', 'photo.jpg')#.replace("\\","/")
-img = io.imread(path)
+#dir = os.path.dirname(__file__)
+#path = os.path.join(dir, 'images', 'photo.jpg')#.replace("\\","/")
+#img = io.imread(path)
 
 dir = os.path.dirname(__file__)
 
@@ -31,12 +31,12 @@ for f in glob.glob(os.path.join(faces_folder_path, "*.jpg")):
     imageWidth = (img.shape[1])
     
     s = np.linspace(0, 2*np.pi, 400)
-    x = imageWidth/2 + imageWidth/2.5*np.cos(s)
+    x = imageWidth/2 + imageWidth/2.3*np.cos(s)
     y = imageHeight/2.1 + imageHeight/2.1*np.sin(s)
     init = np.array([x, y]).T
     
     snake = active_contour(gaussian(img, 3),
-                           init, alpha=0.015, beta=5, gamma=0.001)
+                           init, alpha=0.015, beta=10, gamma=0.001)
     
     #print(snake) 
     #win.add_overlay(snake)

@@ -2,7 +2,7 @@
 import os
 import dlib
 import glob
-#import numpy as np
+import numpy as np
 from skimage import io, color
 #from skimage.filters import gaussian
 #from skimage.segmentation import active_contour
@@ -127,9 +127,16 @@ def checkRedEyes(shape, detection):
     return "Not checked yet"
 
 #TODO    
-def checkExtraObjects(img,shape,detection):                    
-                
-#    ax.plot(init[:, 0], init[:, 1], '--r', lw=3) #piirav kontuur                    
+def checkExtraObjects(img,shape,detection): 
+
+    imageHeight = (img.shape[0])    
+    imageWidth = (img.shape[1])
+    
+    s = np.linspace(0, 2*np.pi, 400)
+    x = imageWidth/2 + imageWidth/2.3*np.cos(s)
+    y = imageHeight/2.1 + imageHeight/2.1*np.sin(s)
+    init = np.array([x, y]).T
+                              
 #    print("\nImage: Width: {} Height: {}".format(imageWidth, imageHeight))
 #    print("Detection: Left: {} Top: {} Right: {} Bottom: {}".format(detection.left(), detection.top(), detection.right(), detection.bottom()))
     return "Not checked yet"
@@ -208,11 +215,11 @@ for f in glob.glob(os.path.join(faces_folder_path, "*.jpg")):
         faceTooLargeB= checkFaceTooLarge(img,d)
         print ("Face not large: {}".format(faceTooLargeB)) 
         
-        eyesOpendB = checkEyesOpen(shape, d)
-        print ("Eyes are open: {}".format(eyesOpendB))
+#        eyesOpendB = checkEyesOpen(shape, d)
+#        print ("Eyes are open: {}".format(eyesOpendB))
         
-        redEyesB = checkRedEyes(shape, d)
-        print ("Red eyes not detected: {}".format(redEyesB))
+#        redEyesB = checkRedEyes(shape, d)
+#        print ("Red eyes not detected: {}".format(redEyesB))
 
         extraObjectsOnPictureB= checkExtraObjects(img, shape, d)
         print ("Extra objects not detected: {}".format(extraObjectsOnPictureB))
@@ -225,6 +232,13 @@ for f in glob.glob(os.path.join(faces_folder_path, "*.jpg")):
 #            win.add_overlay(rects[k])
 
         # Draw the face landmarks on the screen.
-        win.add_overlay(shape)        
+        win.add_overlay(shape) 
+    det2 = dlib.rectangle()
+    det2.top = 30
+    det2.bottom = 80
+    det2.left = 30
+    det2.right = 80
+    
+    win.add_overlay(det2)
     win.add_overlay(dets)    
     input("Press Enter to continue...")
