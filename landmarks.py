@@ -33,9 +33,8 @@ def is_color(img):
     return True
         
         
-def checkFaceCenterToImage(img,shape,detection):
+def checkFaceCenterToImage(img,shape):
     imageWidth = (len((img)[0]))
-#    print (detection.width()) #face rectangle width
     axeCoeff = (imageWidth/shape.part(27).x) #nose upper point
     if 1.7 <= axeCoeff <=2.3:
         return True
@@ -194,7 +193,7 @@ for f in glob.glob(os.path.join(faces_folder_path, "*.jpg")):
         faceQuantityB = checkFaceQuantity(dets)
         print ("Face quantity: {}".format(faceQuantityB))
         
-        faceCenterB =checkFaceCenterToImage(img,shape,d)
+        faceCenterB =checkFaceCenterToImage(img,shape)
         print ("Face centering: {}".format(faceCenterB))
         
         faceVerticalAxeB = checkFaceVerticalAxe(shape, d)
