@@ -1,11 +1,19 @@
-#import sys
+# -*- coding: utf-8 -*-
 import os
 import dlib
 import glob
 import numpy as np
-from skimage import io, color
-#from skimage.filters import gaussian
-#from skimage.segmentation import active_contour
+import matplotlib.pyplot as plt
+
+from random import randint
+from time import clock
+
+from skimage import io#, color
+from skimage.color import rgb2gray
+from skimage.segmentation import felzenszwalb
+from skimage.segmentation import mark_boundaries
+
+startTime = clock()
 
 def checkPhotoDimensions(img):
     imageHeight = (img.shape[0])    
@@ -14,7 +22,7 @@ def checkPhotoDimensions(img):
         return True
     else:
         return False
-           
+                  
 def is_color(img):
     r1,g1,b1 = 0,0,0
     if len(img.shape)==2:
@@ -22,16 +30,25 @@ def is_color(img):
     else:
         imageHeight = (img.shape[0])
         imageWidth = (img.shape[1])
-        for i in range(imageHeight):
-            for j in range(imageWidth):
-                r,g,b = img[i,j]
-                r1 += r
-                g1 += g
-                b1 += b
+
+        for x in range(50): #10 random pixels from image
+            randomX =  randint(1,imageHeight-1)
+            randomY = randint(1,imageWidth-1)            
+            r,g,b = img[randomX,randomY]
+            r1 += r
+            g1 += g
+            b1 += b
         if r1 == g1 == b1:            
             return False
     return True
-        
+    
+def checkBrightness(img):
+    meanBrightness = (np.mean(img))
+    print (meanBrightness)
+    if 115 <= meanBrightness <= 220:
+        return True
+    else:
+        return False      
         
 def checkFaceCenterToImage(img,shape):
     imageWidth = (len((img)[0]))
@@ -70,7 +87,7 @@ def checkFaceStraight(shape):
     return "Not checked yet"
 
 # height of 50–70% of the total vertical length of the photo
-def checkEyesHeight(img,shape,detection):
+def checkEyesHeight(img,shape):
     leftEyeLeftPoint = shape.part(36).y
     rightEyeRightPoint = shape.part(45).y
     eyesHeightLine = (leftEyeLeftPoint + rightEyeRightPoint)/2
@@ -79,8 +96,7 @@ def checkEyesHeight(img,shape,detection):
     if 0.5 <= eyesHeightFactor <= 0.7:
         return True
     else:
-        return False
-    
+        return False    
         
 def checkMouthClosed(shape, detection):
     upperLipY= shape.part(66).y
@@ -94,50 +110,60 @@ def checkMouthClosed(shape, detection):
 
 #TODO Kuna silmade detekteerimine ei ole väga hea, siis see lahendus ei toimi.
 def checkEyesOpen(shape, detection):
-    """    leftEyeUpperOuterY = shape.part(37).y
-    leftEyeUpperInnerY = shape.part(38).y
-    leftEyeUpperMidY=(leftEyeUpperOuterY+leftEyeUpperInnerY)/2
-    leftEyeLowerOuterY = shape.part(41).y
-    leftEyeLowerInnerY = shape.part(40).y
-    leftEyeLowerMidY=(leftEyeLowerOuterY+leftEyeLowerInnerY)/2
-    leftEyeOpenFactor= (leftEyeLowerInnerY - leftEyeUpperInnerY)/detection.height()
-#    print("leftEyeOpenFactor: ", leftEyeOpenFactor)    
-    leftEyeOpenFactor2= (leftEyeLowerMidY - leftEyeUpperMidY)/detection.height()
-#    print("leftEyeOpenFactor2: ", leftEyeOpenFactor2)
-    rightEyeUpperOuterY = shape.part(44).y
-    rightEyeUpperInnerY = shape.part(43).y
-    rightEyeUpperMidY=(leftEyeUpperOuterY+leftEyeUpperInnerY)/2
-    rightEyeLowerOuterY = shape.part(46).y
-    rightEyeLowerInnerY = shape.part(47).y
-    rightEyeLowerMidY=(rightEyeLowerOuterY+rightEyeLowerInnerY)/2
-    rightEyeOpenFactor= (rightEyeLowerMidY - rightEyeUpperMidY)/detection.height()
-#    print("rightEyeOpenFactor: ", rightEyeOpenFactor)
-#    rightEyeOpenFactor= (rightEyeLowerY - rightEyeUpperY)/detection.height()    
-#    print("rightEyeOpenFactor: ", rightEyeOpenFactor)
-#    if rightEyeOpenFactor <= 0.02:
-#        return True
-#    else:
-            return False"""
     return "Not checked yet"
 
 #TODO
 def checkRedEyes(shape, detection):
 #    leftEyeRectangle = shape.part(37).y 
     return "Not checked yet"
-
-#TODO    
-def checkExtraObjects(img,shape,detection): 
-
+ 
+def checkExtraObjects(img): 
+    img = rgb2gray(img)
+#    img = resize(img, (750,600))
+    
     imageHeight = (img.shape[0])    
     imageWidth = (img.shape[1])
     
-    s = np.linspace(0, 2*np.pi, 400)
-    x = imageWidth/2 + imageWidth/2.3*np.cos(s)
-    y = imageHeight/2.1 + imageHeight/2.1*np.sin(s)
-    init = np.array([x, y]).T
-                              
-#    print("\nImage: Width: {} Height: {}".format(imageWidth, imageHeight))
-#    print("Detection: Left: {} Top: {} Right: {} Bottom: {}".format(detection.left(), detection.top(), detection.right(), detection.bottom()))
+    img1 = img[3:int(imageHeight*0.4), 3:int(imageWidth*0.06)]
+    img2 = img[3:int(imageHeight*0.2), 3:int(imageWidth*0.15)]
+    img3 = img[3:int(imageHeight*0.4), imageWidth-int(imageWidth*0.06):int(imageWidth-3)]
+    img4 = img[3:int(imageHeight*0.2), imageWidth-int(imageWidth*0.15):imageWidth-3]
+
+#    segments_fz = felzenszwalb(img, scale=300, sigma=2.2, min_size=80)
+    segments_fz1 = felzenszwalb(img1, scale=300, sigma=2.2, min_size=80)
+    segments_fz2 = felzenszwalb(img2, scale=300, sigma=2.2, min_size=80)
+    segments_fz3 = felzenszwalb(img3, scale=300, sigma=2.2, min_size=80)
+    segments_fz4 = felzenszwalb(img4, scale=300, sigma=2.2, min_size=80)
+    
+    segmentsCount1 = (len(np.unique(segments_fz1)))
+    segmentsCount2 = (len(np.unique(segments_fz2)))
+    segmentsCount3 = (len(np.unique(segments_fz3)))
+    segmentsCount4 = (len(np.unique(segments_fz4)))
+    sumSegmentsCount = segmentsCount1 + segmentsCount2 + segmentsCount3 + segmentsCount4
+
+    """    
+    print("Felzenszwalb number of corner segments: {}".format(sumSegmentsCount))
+    
+    fig, ax = plt.subplots(2, 2, figsize=(10, 10), sharex=True, sharey=True,
+                           subplot_kw={'adjustable': 'box-forced'})
+    
+    ax[0, 0].imshow(mark_boundaries(img1, segments_fz1, (100,20,100)))
+    ax[0, 0].imshow(mark_boundaries(img2, segments_fz2, (100,20,100)))    
+    ax[0, 0].set_title("Felzenszwalbs's method, vasak ylemine nurk")    
+    
+    ax[0, 1].imshow(mark_boundaries(img3, segments_fz3, (100,100,10)))
+    ax[0, 1].imshow(mark_boundaries(img4, segments_fz4, (100,100,10)))    
+    ax[0, 1].set_title("Felzenszwalbs's method, parem ylemine nurk")  
+    
+    ax[1, 0].imshow(mark_boundaries(img, segments_fz, (100,20,50)))
+     
+    plt.tight_layout()
+    plt.show()
+    """
+    if sumSegmentsCount >4:
+        return False
+    else:
+        return True    
     return "Not checked yet"
     
 def checkFaceTooSmall(img, detection):
@@ -158,86 +184,83 @@ def checkFaceTooLarge(img, detection):
     else:
         return True
 
-dir = os.path.dirname(__file__)
-predictor_path = os.path.join(dir, 'shape_predictor_68_face_landmarks.dat')
-
-faces_folder_path = os.path.join(dir,'images')
-print (faces_folder_path)
-detector = dlib.get_frontal_face_detector()
-predictor = dlib.shape_predictor(predictor_path)
-win = dlib.image_window()
-
-for f in glob.glob(os.path.join(faces_folder_path, "*.jpg")):
-    print("\nProcessing file: {}".format(f))
-    img = io.imread(f)
-
-    win.clear_overlay()
-    win.set_image(img)
+def main():
+             
+    dir = os.path.dirname(__file__)
+    predictor_path = os.path.join(dir, 'shape_predictor_68_face_landmarks.dat')
     
-    PhotoDimensionsB = checkPhotoDimensions(img)
-    print ("Photo minimal dimensions OK: {}".format(PhotoDimensionsB))
+    faces_folder_path = os.path.join(dir,'images')
+    print (faces_folder_path)
+    detector = dlib.get_frontal_face_detector()
+    predictor = dlib.shape_predictor(predictor_path)
+    win = dlib.image_window()
     
-    PhotoColorityB = is_color(img) #checkPhotoColor(img)
-    print ("Photo is color: {}".format(PhotoColorityB))    
-
-    # Ask the detector to find the bounding boxes of each face. The 1 in the
-    # second argument indicates that we should upsample the image 1 time. This
-    # will make everything bigger and allow us to detect more faces.
-    dets = detector(img, 1)
-    print("Number of faces detected: {}".format(len(dets)))
-    for k, d in enumerate(dets): 
-        print("\nDetection {}: Left: {} Top: {} Right: {} Bottom: {}".format(k, d.left(), d.top(), d.right(), d.bottom()))
-        # Get the landmarks/parts for the face in box d.
-        shape = predictor(img, d)
-
-        faceQuantityB = checkFaceQuantity(dets)
-        print ("Face quantity: {}".format(faceQuantityB))
-        
-        faceCenterB =checkFaceCenterToImage(img,shape)
-        print ("Face centering: {}".format(faceCenterB))
-        
-        faceVerticalAxeB = checkFaceVerticalAxe(shape, d)
-        print ("Face verticality: {}".format(faceVerticalAxeB))
-     
-        faceIsStraightB = checkFaceStraight(shape)
-        print ("Face is straight: {}".format(faceIsStraightB))
-        
-        eyesHeightB =checkEyesHeight(img,shape,d)
-        print ("Eyes height correct: {}".format(eyesHeightB))        
-        
-        mouthClosedB = checkMouthClosed(shape, d)
-        print ("Mouth is closed: {}".format(mouthClosedB))
-        
-        faceTooSmallB= checkFaceTooSmall(img,d)
-        print ("Face not small: {}".format(faceTooSmallB))        
-        
-        faceTooLargeB= checkFaceTooLarge(img,d)
-        print ("Face not large: {}".format(faceTooLargeB)) 
-        
-#        eyesOpendB = checkEyesOpen(shape, d)
-#        print ("Eyes are open: {}".format(eyesOpendB))
-        
-#        redEyesB = checkRedEyes(shape, d)
-#        print ("Red eyes not detected: {}".format(redEyesB))
-
-        extraObjectsOnPictureB= checkExtraObjects(img, shape, d)
-        print ("Extra objects not detected: {}".format(extraObjectsOnPictureB))
-        
-#        rects = []
-#        dlib.find_candidate_object_locations(img, rects, min_size=10000)       
-#        print("number of rectangles found {}".format(len(rects))) 
-#        for k, d in enumerate(rects):
-#            print("Detection {}: Left: {} Top: {} Right: {} Bottom: {}".format(k, d.left(), d.top(), d.right(), d.bottom()))
-#            win.add_overlay(rects[k])
-
-        # Draw the face landmarks on the screen.
-        win.add_overlay(shape) 
-    det2 = dlib.rectangle()
-    det2.top = 30
-    det2.bottom = 80
-    det2.left = 30
-    det2.right = 80
+    for f in glob.glob(os.path.join(faces_folder_path, "*.jpg")):
+        print("\nProcessing file: {}".format(f))
+        img = io.imread(f)
     
-    win.add_overlay(det2)
-    win.add_overlay(dets)    
-    input("Press Enter to continue...")
+        win.clear_overlay()
+        win.set_image(img)
+               
+        photoDimensionsB = checkPhotoDimensions(img)
+        print ("Photo minimal dimensions OK: {}".format(photoDimensionsB))
+        
+        photoColorityB = is_color(img) #checkPhotoColor(img)
+        print ("Photo is color: {}".format(photoColorityB)) 
+        
+        photoBrightnessB = checkBrightness(img)
+        print ("Photo brightness is OK: {}".format(photoBrightnessB))
+    
+        # Ask the detector to find the bounding boxes of each face. The 1 in the
+        # second argument indicates that we should upsample the image 1 time. This
+        # will make everything bigger and allow us to detect more faces.
+        dets = detector(img, 1)
+        print("Number of faces detected: {}".format(len(dets)))
+        for k, d in enumerate(dets): 
+            print("\nDetected face No: {}".format(k))
+            # Get the landmarks/parts for the face in box d.
+            shape = predictor(img, d)
+    
+            faceQuantityB = checkFaceQuantity(dets)
+            print ("Face quantity: {}".format(faceQuantityB))
+            
+            faceCenterB =checkFaceCenterToImage(img,shape)
+            print ("Face centering: {}".format(faceCenterB))
+            
+            faceVerticalAxeB = checkFaceVerticalAxe(shape, d)
+            print ("Face verticality: {}".format(faceVerticalAxeB))
+         
+            faceIsStraightB = checkFaceStraight(shape)
+            print ("Face is straight: {}".format(faceIsStraightB))
+            
+            eyesHeightB =checkEyesHeight(img,shape)
+            print ("Eyes height correct: {}".format(eyesHeightB))        
+            
+            mouthClosedB = checkMouthClosed(shape, d)
+            print ("Mouth is closed: {}".format(mouthClosedB))
+            
+            faceTooSmallB= checkFaceTooSmall(img,d)
+            print ("Face not small: {}".format(faceTooSmallB))        
+            
+            faceTooLargeB= checkFaceTooLarge(img,d)
+            print ("Face not large: {}".format(faceTooLargeB)) 
+            
+    #        eyesOpendB = checkEyesOpen(shape, d)
+    #        print ("Eyes are open: {}".format(eyesOpendB))
+            
+    #        redEyesB = checkRedEyes(shape, d)
+    #        print ("Red eyes not detected: {}".format(redEyesB))
+    
+            extraObjectsOnPictureB= checkExtraObjects(img)
+            print ("Background correct: {}".format(extraObjectsOnPictureB))
+            
+            # Draw the face landmarks on the screen.
+            win.add_overlay(shape)
+        win.add_overlay(dets)    
+#        input("Press Enter to continue...")
+        timeLeft = (clock() - startTime) #arvutab kulunud aja
+
+    print("Time left: {} sec".format(timeLeft))
+    
+if __name__ == '__main__':
+    main()
