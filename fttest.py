@@ -87,13 +87,13 @@ class TestMethods(unittest.TestCase):
     def test_checkEyesHeightTrue(self):
         dets = self.detector(self.img, 1)
         for k, d in enumerate(dets):
-           result = checkEyesHeight(self.img, self.predictor(self.img, d), d)
+           result = checkEyesHeight(self.img, self.predictor(self.img, d))
         self.assertTrue(result)
 
     def test_checkEyesHeightFalse(self):
         dets = self.detector(self.imgHen, 1)
         for k, d in enumerate(dets):
-           result = checkEyesHeight(self.imgHen, self.predictor(self.imgHen, d), d)
+           result = checkEyesHeight(self.imgHen, self.predictor(self.imgHen, d))
         self.assertFalse(result)
         
     def test_checkMouthClosedTrue(self):
@@ -133,7 +133,20 @@ class TestMethods(unittest.TestCase):
         for k, d in enumerate(dets):
            result = checkFaceTooLarge(img3, d)
         self.assertFalse(result)
+    
+    def test_checkBrightnessTrue(self):
+        self.assertTrue(checkBrightness(self.img))
         
+    def test_checkBrightnessFalse(self):
+        img3 = io.imread("images/moved/overexposed2.jpg")
+        self.assertFalse(checkBrightness(img3))
+        
+    def test_checkExtraObjectsTrue(self):
+        self.assertTrue(checkExtraObjects(self.img))
+        
+    def test_checkExtraObjectsFalse(self):
+        img3 = io.imread("images/moved/sester.jpg")
+        self.assertFalse(checkExtraObjects(img3))
         
 if __name__ == '__main__':
     unittest.main()
