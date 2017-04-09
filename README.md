@@ -10,7 +10,7 @@ Vajalik paigaldada pakett dlib ('pip install dlib' käivitada nt kaustas ..\Anac
 
 Vajalik paigaldada pakett exifread ('pip install exifread' käivitada nt kaustas ..\Anaconda3\Scripts).
 
-Käesolevalt toimuvad järgmised kontrollid (True/False):
+# Käesolevalt toimuvad järgmised kontrollid (True/False):
 
 # Foto üldised kontrollid:
 1. Foto miinimumõõtude kontroll (600x750px)
