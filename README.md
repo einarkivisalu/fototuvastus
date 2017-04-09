@@ -12,6 +12,7 @@ Käesolevalt toimuvad järgmised kontrollid (True/False):
 # Foto üldised kontrollid:
 1. Foto miinimumõõtude kontroll (600x750px)
 2. Kas on tegu värvifotoga
+4. Foto üldheleduse kontroll
 3. Leitud nägude arv (Kui leitakse rohkem nägusid kui üks, siis praegu uuritakse neid edasi, reaalses projektis on otstarbekas edasine uurimine lõpetada).
 
 # Näo kontrollid:
@@ -22,4 +23,4 @@ Käesolevalt toimuvad järgmised kontrollid (True/False):
 5. Kas suu on suletud
 6. Kas nägu on liiga väike
 7. Kas nägu on liiga suur
-
+8. Taustaobjektide kontroll
