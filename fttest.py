@@ -9,9 +9,9 @@ class TestMethods(unittest.TestCase):
     @classmethod    
     def setUpClass(self):
         print("setup class")
-        self.img = io.imread("images/moved/002.jpg")
-        self.img2 = io.imread("images/Ajutine/2017-03-13 11.05.44 1469482145957050217_selfie.jpg")
-        self.imgHen = io.imread("images/moved/hendrix2.jpg")
+        self.img = io.imread("images/Test/002.jpg")
+        self.img2 = io.imread("images/Test/2017-03-13 11.05.44 1469482145957050217_selfie.jpg")
+        self.imgHen = io.imread("images/Test/hendrix2.jpg")
         self.predictor_path = os.path.join(os.path.dirname(__file__), 'shape_predictor_68_face_landmarks.dat')
         self.detector = dlib.get_frontal_face_detector()
         self.predictor = dlib.shape_predictor(self.predictor_path)
@@ -21,7 +21,7 @@ class TestMethods(unittest.TestCase):
         self.assertFalse(result)
         
     def test_checkPhotoDimensionsTrue(self):
-        img3 = io.imread("images/moved/2010_0213canada0002fx.jpg ")
+        img3 = io.imread("images/Test/2010_0213canada0002fx.jpg ")
         result = checkPhotoDimensions(img3)
         self.assertTrue(result)
 
@@ -36,7 +36,7 @@ class TestMethods(unittest.TestCase):
 
 #   vaja on 1 kanaliga must-valget pilti       
     def test_is_colorFalse2(self):
-        img3 = io.imread("images/Ajutine/hendrix.jpg")
+        img3 = io.imread("images/Test/hendrix.jpg")
         result = is_color(img3)
         self.assertFalse(result)
 
@@ -44,7 +44,7 @@ class TestMethods(unittest.TestCase):
         self.assertTrue(checkFaceQuantity(self.detector(self.img, 1)))
 
     def test_checkFaceQuantityFalse(self):
-        img3 = io.imread("images/moved/ClosedEye.jpg");
+        img3 = io.imread("images/Test/ClosedEye.jpg");
         self.assertTrue(checkFaceQuantity(self.detector(img3, 1)))
 
 
@@ -103,7 +103,7 @@ class TestMethods(unittest.TestCase):
         self.assertTrue(result)
 
     def test_checkMouthClosedFalse(self):
-        img3 = io.imread("images/Ajutine/red_eye.jpg")
+        img3 = io.imread("images/Test/red_eye.jpg")
         dets = self.detector(img3, 1)
         for k, d in enumerate(dets):
            result = checkMouthClosed(self.predictor(img3, d), d)
@@ -128,7 +128,7 @@ class TestMethods(unittest.TestCase):
         self.assertTrue(result)
         
     def test_checkFaceTooLargeFalse(self):
-        img3 = io.imread("images/moved/pO4QXG7RJAYK.jpg")
+        img3 = io.imread("images/Test/pO4QXG7RJAYK.jpg")
         dets = self.detector(img3, 1)
         for k, d in enumerate(dets):
            result = checkFaceTooLarge(img3, d)
@@ -138,14 +138,14 @@ class TestMethods(unittest.TestCase):
         self.assertTrue(checkBrightness(self.img))
         
     def test_checkBrightnessFalse(self):
-        img3 = io.imread("images/moved/overexposed2.jpg")
+        img3 = io.imread("images/Test/overexposed2.jpg")
         self.assertFalse(checkBrightness(img3))
         
     def test_checkBackgroundObjectsTrue(self):
         self.assertTrue(checkBackgroundObjects(self.img))
         
     def test_checkBackgroundObjectsFalse(self):
-        img3 = io.imread("images/moved/sester.jpg")
+        img3 = io.imread("images/Test/sester.jpg")
         self.assertFalse(checkBackgroundObjects(img3))
         
 if __name__ == '__main__':
