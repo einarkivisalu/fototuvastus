@@ -2,7 +2,7 @@ import unittest
 import dlib
 
 from skimage import io, color
-from landmarks import *
+from photoQualityChecker import *
 
 class TestMethods(unittest.TestCase):
 
@@ -14,7 +14,7 @@ class TestMethods(unittest.TestCase):
         self.imgHen = io.imread("images/moved/hendrix2.jpg")
         self.predictor_path = os.path.join(os.path.dirname(__file__), 'shape_predictor_68_face_landmarks.dat')
         self.detector = dlib.get_frontal_face_detector()
-        self.predictor = dlib.shape_predictor(predictor_path)
+        self.predictor = dlib.shape_predictor(self.predictor_path)
     
     def test_checkPhotoDimensionsFalse(self):
         result = checkPhotoDimensions(self.img)
@@ -141,12 +141,12 @@ class TestMethods(unittest.TestCase):
         img3 = io.imread("images/moved/overexposed2.jpg")
         self.assertFalse(checkBrightness(img3))
         
-    def test_checkExtraObjectsTrue(self):
-        self.assertTrue(checkExtraObjects(self.img))
+    def test_checkBackgroundObjectsTrue(self):
+        self.assertTrue(checkBackgroundObjects(self.img))
         
-    def test_checkExtraObjectsFalse(self):
+    def test_checkBackgroundObjectsFalse(self):
         img3 = io.imread("images/moved/sester.jpg")
-        self.assertFalse(checkExtraObjects(img3))
+        self.assertFalse(checkBackgroundObjects(img3))
         
 if __name__ == '__main__':
     unittest.main()
