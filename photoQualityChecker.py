@@ -20,7 +20,12 @@ from skimage import io#, color
 from skimage.color import rgb2gray
 from skimage.segmentation import felzenszwalb
 from skimage.segmentation import mark_boundaries
+from skimage.exposure import histogram
 
+<<<<<<< .mine
+
+||||||| .r32
+=======
 app = Flask(__name__)
 app.wsgi_app = ProxyFix(app.wsgi_app)
 api = Api(app, version='1.0', title='Fototuvastus API',
@@ -29,6 +34,7 @@ api = Api(app, version='1.0', title='Fototuvastus API',
 
 ns = api.namespace('detect', description='Face detection')
 
+>>>>>>> .r35
 startTime = clock()
 config = configparser.ConfigParser()
 config.read('config.ini')
@@ -82,6 +88,19 @@ def checkBrightness(img):
             return False
     except:
         return False
+
+def checkOverExposure(img):
+    a = histogram(img.ravel())
+#    print (a[0])
+#    print (a[0].sum())
+#    print (a[1].sum())
+#    b = np.hstack((a[0].normal(size=1000),a[0].normal(loc=5, scale=2, size=1000)))
+#    plt.a(b,bins='auto')
+    rng = histogram(img) #np.random.RandomState(10)  # deterministic random data
+    a = np.hstack((rng[0]))#.normal(size=1000),rng[0]))#.normal(loc=5, scale=2, size=1000)))
+    plt.hist(a, bins='auto')  # plt.hist passes it's arguments to np.histogram
+    plt.title("Histogram with 'auto' bins")
+    plt.show()    
         
 def checkPhotoAge(fileName):
     try:
@@ -308,6 +327,8 @@ def main():
             photoBrightnessB = checkBrightness(img)
             print ("Photo brightness is OK: {}".format(photoBrightnessB))
             
+            checkOverExposure(img)
+            
             photoAgeB = checkPhotoAge(f)
             print ("Photo age is OK: {}".format(photoAgeB))
         
@@ -371,5 +392,11 @@ class Detection(Resource):
 if __name__ == '__main__':
     app.run()
     main()
+<<<<<<< .mine
+#    timeLeft = (clock() - startTime) #arvutab kulunud aja
+#    print("Time left: {} sec".format(timeLeft))    ||||||| .r32
+    timeLeft = (clock() - startTime) #arvutab kulunud aja
+    print("Time left: {} sec".format(timeLeft))    =======
     timeLeft = (clock() - startTime) #arvutab kulunud aja
     print("Time left: {} sec".format(timeLeft))
+>>>>>>> .r35
