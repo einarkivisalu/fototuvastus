@@ -378,7 +378,7 @@ def main():
                 win.add_overlay(shape)
                 count += 1
             win.add_overlay(dets)    
-            input("Press Enter to continue...")   
+            #input("Press Enter to continue...")   
     print ("\nPhotos count: ", count)
     return count
 
