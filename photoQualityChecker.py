@@ -13,10 +13,12 @@ from random import randint
 from time import clock
 from datetime import datetime
 
-from skimage import io#, color
+from scipy import misc
+from skimage import io, filters#, color
 from skimage.color import rgb2gray
 from skimage.segmentation import felzenszwalb
 from skimage.segmentation import mark_boundaries
+from skimage.exposure import histogram
 
 startTime = clock()
 config = configparser.ConfigParser()
@@ -65,12 +67,16 @@ def checkBrightness(img):
         maxBrightness = int(config['brightness']['maxBrightness'])    
         meanBrightness = (np.mean(img))
         print ("  Photo mean brightness: ", meanBrightness)
+
+#        result = filters.exposure.adjust_gamma(img, 2)
+#        print (result)
+        
         if minBrightness <= meanBrightness <= maxBrightness:
             return True
         else:
             return False
     except:
-        return False
+        return ("error", False)
         
 def checkPhotoAge(fileName):
     try:
@@ -80,12 +86,12 @@ def checkPhotoAge(fileName):
         kuupString = str(tags['EXIF DateTimeOriginal'])
         dte = datetime.strptime(kuupString, '%Y:%m:%d %H:%M:%S')
         tday = (datetime.now())
-        if ((datetime.date(tday) -datetime.date(dte)).days) <= allowedAge:
-            return True
-        else:
+        if ((datetime.date(tday) -datetime.date(dte)).days) >= allowedAge:
             return False
+        else:
+            return True
     except:
-        return False
+        return "No EXIF data"
         
 def checkFaceCenterToImage(img,shape):
     try:
@@ -347,7 +353,7 @@ def main():
                 win.add_overlay(shape)
                 count += 1
             win.add_overlay(dets)    
-    #        input("Press Enter to continue...")   
+            input("Press Enter to continue...")   
     print ("\nPhotos count: ", count)
             
 if __name__ == '__main__':
