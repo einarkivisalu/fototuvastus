@@ -8,6 +8,9 @@ import configparser
 import numpy as np
 import matplotlib.pyplot as plt
 import exifread
+from flask import Flask
+from flask_restplus import Api, Resource, fields
+from werkzeug.contrib.fixers import ProxyFix
 
 from random import randint
 from time import clock
@@ -17,6 +20,14 @@ from skimage import io#, color
 from skimage.color import rgb2gray
 from skimage.segmentation import felzenszwalb
 from skimage.segmentation import mark_boundaries
+
+app = Flask(__name__)
+app.wsgi_app = ProxyFix(app.wsgi_app)
+api = Api(app, version='1.0', title='Fototuvastus API',
+    description='Meeskonnaprojekt: Fototuvastus',
+)
+
+ns = api.namespace('detect', description='Face detection')
 
 startTime = clock()
 config = configparser.ConfigParser()
@@ -349,8 +360,16 @@ def main():
             win.add_overlay(dets)    
     #        input("Press Enter to continue...")   
     print ("\nPhotos count: ", count)
-            
+    return count
+
+@ns.route('/start')
+class Detection(Resource):
+    @ns.doc('Detect image')
+    def get(self):
+        return {"hello":"world"}
+
 if __name__ == '__main__':
+    app.run()
     main()
     timeLeft = (clock() - startTime) #arvutab kulunud aja
-    print("Time left: {} sec".format(timeLeft))    
+    print("Time left: {} sec".format(timeLeft))
