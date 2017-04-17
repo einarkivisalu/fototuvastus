@@ -23,19 +23,13 @@ from skimage.segmentation import felzenszwalb
 from skimage.segmentation import mark_boundaries
 from skimage.exposure import histogram
 
-<<<<<<< .mine
-
-||||||| .r32
-=======
 app = Flask(__name__)
 app.wsgi_app = ProxyFix(app.wsgi_app)
 api = Api(app, version='1.0', title='Fototuvastus API',
-    description='Meeskonnaprojekt: Fototuvastus',
-)
+    description='Meeskonnaprojekt: Fototuvastus',)
 
 ns = api.namespace('detect', description='Face detection')
 
->>>>>>> .r35
 startTime = clock()
 config = configparser.ConfigParser()
 config.read('config.ini')
@@ -92,10 +86,7 @@ def checkBrightness(img):
         else:
             return False
     except:
-<<<<<<< HEAD
         return ("error", False)
-=======
-        return False
 
 def checkOverExposure(img):
     a = histogram(img.ravel())
@@ -109,7 +100,6 @@ def checkOverExposure(img):
     plt.hist(a, bins='auto')  # plt.hist passes it's arguments to np.histogram
     plt.title("Histogram with 'auto' bins")
     plt.show()    
->>>>>>> 8278a1898fea07e2ffb421444886e66b7b46475a
         
 def checkPhotoAge(fileName):
     try:
@@ -401,11 +391,6 @@ class Detection(Resource):
 if __name__ == '__main__':
     app.run()
     main()
-<<<<<<< .mine
-#    timeLeft = (clock() - startTime) #arvutab kulunud aja
-#    print("Time left: {} sec".format(timeLeft))    ||||||| .r32
-    timeLeft = (clock() - startTime) #arvutab kulunud aja
-    print("Time left: {} sec".format(timeLeft))    =======
+
     timeLeft = (clock() - startTime) #arvutab kulunud aja
     print("Time left: {} sec".format(timeLeft))
->>>>>>> .r35
