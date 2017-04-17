@@ -10,6 +10,10 @@ Vajalik paigaldada pakett dlib ('pip install dlib' käivitada nt kaustas ..\Anac
 
 Vajalik paigaldada pakett exifread ('pip install exifread' käivitada nt kaustas ..\Anaconda3\Scripts).
 
+Vajalik teha pip install flask ja pip install flask-restplus
+
+
+
 # Käesolevalt toimuvad järgmised kontrollid (True/False):
 
 # Foto üldised kontrollid:
