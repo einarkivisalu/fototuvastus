@@ -17,7 +17,7 @@ from time import clock
 from datetime import datetime
 
 from scipy import misc
-from skimage import io, filters#, color
+from skimage import filters#, color, io
 from skimage.color import rgb2gray
 from skimage.segmentation import felzenszwalb
 from skimage.segmentation import mark_boundaries
@@ -312,7 +312,7 @@ def main():
         #    print(f)
         #for f in glob.glob(os.path.join(faces_folder_path, "*.jpg")):
             print("\nProcessing file: {}".format(f))
-            img = io.imread(f)
+            img = misc.imread(f, False, 'RGB')
             
             win.clear_overlay()
             win.set_image(img)        
