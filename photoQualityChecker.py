@@ -76,7 +76,7 @@ def checkBrightness(img):
         minBrightness = int(config['brightness']['minBrightness'])
         maxBrightness = int(config['brightness']['maxBrightness'])    
         meanBrightness = (np.mean(img))
-        print ("  Photo mean brightness: ", meanBrightness)
+#        print ("  Photo mean brightness: ", meanBrightness)
 
 #        result = filters.exposure.adjust_gamma(img, 2)
 #        print (result)
@@ -303,7 +303,7 @@ def main():
 #    print (faces_folder_path)
     detector = dlib.get_frontal_face_detector()
     predictor = dlib.shape_predictor(predictor_path)
-    win = dlib.image_window()
+#    win = dlib.image_window()
     
     count = 0
     for f in glob.glob(os.path.join(dir, 'images',"*.*")):
@@ -314,8 +314,8 @@ def main():
             print("\nProcessing file: {}".format(f))
             img = misc.imread(f, False, 'RGB')
             
-            win.clear_overlay()
-            win.set_image(img)        
+#            win.clear_overlay()
+#            win.set_image(img)        
                    
             photoDimensionsB = checkPhotoDimensions(img)
             print ("Photo minimal dimensions OK: {}".format(photoDimensionsB))
@@ -326,7 +326,7 @@ def main():
             photoBrightnessB = checkBrightness(img)
             print ("Photo brightness is OK: {}".format(photoBrightnessB))
             
-            checkOverExposure(img)
+#            checkOverExposure(img)
             
             photoAgeB = checkPhotoAge(f)
             print ("Photo age is OK: {}".format(photoAgeB))
@@ -375,9 +375,9 @@ def main():
                 print ("Background correct: {}".format(backgroundB))
                 
                 # Draw the face landmarks on the screen.
-                win.add_overlay(shape)
+#                win.add_overlay(shape)
                 count += 1
-            win.add_overlay(dets)    
+#            win.add_overlay(dets)    
             #input("Press Enter to continue...")   
     print ("\nPhotos count: ", count)
     return count
