@@ -1,0 +1,24 @@
+Testitud Ubuntu 17.04 Server'i puhtal paigaldusel
+Minimum requirement 2 GB RAM
+
+sudo apt install python3-pip
+
+#sudo apt install linuxbrew-wrapper
+#brew install boost-python --with python3
+
+sudo apt-get install libboost-all-dev
+
+sudo add-apt-repository ppa:george-edison55/cmake-3.x
+sudo apt-get update
+sudo apt-get install cmake
+
+pip3 install dlib
+
+pip3 install scikit-image
+pip3 install numpy
+pip3 install exifread 
+
+pip3 install flask
+pip3 install flask-restplus
+
+git clone https://github.com/einarkivisalu/fototuvastus
