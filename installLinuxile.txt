@@ -3,8 +3,8 @@ Minimum requirement 2 GB RAM
 
 sudo apt install python3-pip
 
-#sudo apt install linuxbrew-wrapper
-#brew install boost-python --with python3
+#sudo apt install linuxbrew-wrapper 		#Ubuntu desktop puhul ?
+#brew install boost-python --with python3 	#Ubuntu desktop puhul ?
 
 sudo apt-get install libboost-all-dev
 
@@ -15,10 +15,12 @@ sudo apt-get install cmake
 pip3 install dlib
 
 pip3 install scikit-image
-pip3 install numpy
+pip3 install matplotlib
 pip3 install exifread 
 
 pip3 install flask
 pip3 install flask-restplus
+
+sudo apt-get install python3-tk
 
 git clone https://github.com/einarkivisalu/fototuvastus
