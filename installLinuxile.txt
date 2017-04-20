@@ -3,8 +3,8 @@ Minimum requirement 2 GB RAM
 
 sudo apt install python3-pip
 
-#sudo apt install linuxbrew-wrapper 		#Ubuntu desktop puhul ?
-#brew install boost-python --with python3 	#Ubuntu desktop puhul ?
+#sudo apt install linuxbrew-wrapper 		#Ubuntu desktop puhul
+#brew install boost-python --with python3 	#Ubuntu desktop puhul
 
 sudo apt-get install libboost-all-dev
 
@@ -26,3 +26,10 @@ pip3 install flask-restplus
 sudo apt-get install python3-tk
 
 git clone https://github.com/einarkivisalu/fototuvastus
+
+#-----------------
+cd fototuvastus
+python3 photoQualityChecker.py #käivitab REST serveri http://127.0.0.1:5000
+
+#ctrl+C suleb REST serveri ja jooksutab ülejäänud koodi läbi
+
