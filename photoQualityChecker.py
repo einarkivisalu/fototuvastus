@@ -29,6 +29,22 @@ from skimage.segmentation import felzenszwalb
 from skimage.segmentation import mark_boundaries
 from skimage.exposure import histogram
 
+class Results:
+    result = True
+    dimensions = True
+    color = True
+    brightness = True 
+    photoage = True
+    facequantity = True
+    facecenter = True
+    vertical = True
+    eyesheight = True
+    straight = True
+    mouthclosed = True
+    facesmall = True
+    facelarge = True
+    background = True    
+
 if getattr(sys, 'frozen', False):
     template_folder = os.path.join(sys._MEIPASS, 'templates')
     app = Flask(__name__, template_folder=template_folder)
@@ -308,10 +324,10 @@ def checkFaceTooLarge(img, detection):
     except:
         return False
 
-def main():
-             
+def runDetect(img, f):
     dir = os.path.dirname(__file__)
     predictor_path = os.path.join(dir, 'shape_predictor_68_face_landmarks.dat')
+    result = Results()
     
 #    faces_folder_path = os.path.join(dir,'images')
 #    print (faces_folder_path)
@@ -319,7 +335,84 @@ def main():
     predictor = dlib.shape_predictor(predictor_path)
 #    win = dlib.image_window()
     
-    count = 0
+#    win.clear_overlay()
+#    win.set_image(img)        
+                   
+    result.dimensions = checkPhotoDimensions(img)
+    print ("Photo minimal dimensions OK: {}".format(result.dimensions))
+            
+    result.color = is_color(img) #checkPhotoColor(img)
+    print ("Photo is color: {}".format(result.color)) 
+    
+    result.brightness = checkBrightness(img)
+    print ("Photo brightness is OK: {}".format(result.brightness))
+
+#            checkOverExposure(img)
+    
+    result.photoage = checkPhotoAge(f)
+    print ("Photo age is OK: {}".format(result.photoage))
+    
+    # Ask the detector to find the bounding boxes of each face. The 1 in the
+    # second argument indicates that we should upsample the image 1 time. This
+    # will make everything bigger and allow us to detect more faces.
+    dets = detector(img, 1)
+    print("Number of faces detected: {}".format(len(dets)))
+    
+    result.background = checkBackgroundObjects(img)
+    print ("Background correct: {}".format(result.background))
+   
+    result.facequantity = checkFaceQuantity(dets)
+    print ("Face quantity: {}".format(result.facequantity))
+
+    for k, d in enumerate(dets): 
+        print("\nDetected face No: {}".format(k))
+        # Get the landmarks/parts for the face in box d.
+        shape = predictor(img, d)
+
+        result.facecenter = checkFaceCenterToImage(img,shape)
+        print ("Face centering: {}".format(result.facecenter))
+        
+        result.vertical = checkFaceVerticalAxe(shape, d)
+        print ("Face verticality: {}".format(result.vertical))
+     
+        result.straight = checkFaceStraight(shape)
+        print ("Face is straight: {}".format(result.straight))
+        
+        result.eyesheight = checkEyesHeight(img,shape)
+        print ("Eyes height correct: {}".format(result.eyesheight))
+        
+        result.mouthclosed = checkMouthClosed(shape, d)
+        print ("Mouth is closed: {}".format(result.mouthclosed))
+        
+        result.facesmall = checkFaceTooSmall(img,d)
+        print ("Face not small: {}".format(result.facesmall))        
+        
+        result.facelarge = checkFaceTooLarge(img,d)
+        print ("Face not large: {}".format(result.facelarge)) 
+        
+#        eyesOpendB = checkEyesOpen(shape, d)
+#        print ("Eyes are open: {}".format(eyesOpendB))
+        
+#        redEyesB = checkRedEyes(shape, d)
+#        print ("Red eyes not detected: {}".format(redEyesB))
+        
+        # Draw the face landmarks on the screen.
+#                win.add_overlay(shape)
+#            win.add_overlay(dets)    
+    #input("Press Enter to continue...")   
+    if (result.background == False or result.brightness == False or
+        result.color == False or result.dimensions == False or 
+        result.eyesheight == False or result.facecenter == False or
+        result.facelarge == False or result.facequantity == False or 
+        result.facesmall == False or result.mouthclosed == False or
+        result.photoage == False or result.straight == False or 
+        result.vertical == False): 
+        result.result = False
+                
+    return result
+
+def main():
+    dir = os.path.dirname(__file__)
     for f in glob.glob(os.path.join(dir, 'images',"*.*")):
         extension = os.path.splitext(f)[1]
         if extension == ".jpg" or extension == ".jpeg" or extension == ".png" or extension == ".tif" or extension == ".tiff" or extension == ".bmp":
@@ -327,74 +420,7 @@ def main():
         #for f in glob.glob(os.path.join(faces_folder_path, "*.jpg")):
             print("\nProcessing file: {}".format(f))
             img = misc.imread(f, False, 'RGB')
-            
-#            win.clear_overlay()
-#            win.set_image(img)        
-                   
-            photoDimensionsB = checkPhotoDimensions(img)
-            print ("Photo minimal dimensions OK: {}".format(photoDimensionsB))
-            
-            photoColorityB = is_color(img) #checkPhotoColor(img)
-            print ("Photo is color: {}".format(photoColorityB)) 
-            
-            photoBrightnessB = checkBrightness(img)
-            print ("Photo brightness is OK: {}".format(photoBrightnessB))
-            
-#            checkOverExposure(img)
-            
-            photoAgeB = checkPhotoAge(f)
-            print ("Photo age is OK: {}".format(photoAgeB))
-        
-            # Ask the detector to find the bounding boxes of each face. The 1 in the
-            # second argument indicates that we should upsample the image 1 time. This
-            # will make everything bigger and allow us to detect more faces.
-            dets = detector(img, 1)
-            print("Number of faces detected: {}".format(len(dets)))
-            for k, d in enumerate(dets): 
-                print("\nDetected face No: {}".format(k))
-                # Get the landmarks/parts for the face in box d.
-                shape = predictor(img, d)
-        
-                faceQuantityB = checkFaceQuantity(dets)
-                print ("Face quantity: {}".format(faceQuantityB))
-                
-                faceCenterB =checkFaceCenterToImage(img,shape)
-                print ("Face centering: {}".format(faceCenterB))
-                
-                faceVerticalAxeB = checkFaceVerticalAxe(shape, d)
-                print ("Face verticality: {}".format(faceVerticalAxeB))
-             
-                faceIsStraightB = checkFaceStraight(shape)
-                print ("Face is straight: {}".format(faceIsStraightB))
-                
-                eyesHeightB =checkEyesHeight(img,shape)
-                print ("Eyes height correct: {}".format(eyesHeightB))        
-                
-                mouthClosedB = checkMouthClosed(shape, d)
-                print ("Mouth is closed: {}".format(mouthClosedB))
-                
-                faceTooSmallB= checkFaceTooSmall(img,d)
-                print ("Face not small: {}".format(faceTooSmallB))        
-                
-                faceTooLargeB= checkFaceTooLarge(img,d)
-                print ("Face not large: {}".format(faceTooLargeB)) 
-                
-        #        eyesOpendB = checkEyesOpen(shape, d)
-        #        print ("Eyes are open: {}".format(eyesOpendB))
-                
-        #        redEyesB = checkRedEyes(shape, d)
-        #        print ("Red eyes not detected: {}".format(redEyesB))
-        
-                backgroundB= checkBackgroundObjects(img)
-                print ("Background correct: {}".format(backgroundB))
-                
-                # Draw the face landmarks on the screen.
-#                win.add_overlay(shape)
-                count += 1
-#            win.add_overlay(dets)    
-            #input("Press Enter to continue...")   
-    print ("\nPhotos count: ", count)
-    return count
+            runDetect(img, f)
 
 @ns.route('/start')
 class Detection(Resource):
@@ -403,7 +429,7 @@ class Detection(Resource):
         return {"hello":"world - fototuvastus"}
 
 if __name__ == '__main__':
-    app.run()
+#    app.run()
     main()
     timeLeft = (clock() - startTime) #arvutab kulunud aja
     print("Time left: {} sec".format(timeLeft))
