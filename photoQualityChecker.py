@@ -1,20 +1,26 @@
 # -*- coding: utf-8 -*-
-# Einar Kivisalu, TTY 04.2017
+# Einar Kivisalu, Riivo Mägi, Martin Talimets jt. TTY 04.2017
 
 import os
+import sys
 import dlib
 import glob
 import configparser
 import numpy as np
 import matplotlib.pyplot as plt
 import exifread
+
 from flask import Flask
+#import flask_restplus.api as Api
+#import flask_restplus.resource as Resource
 from flask_restplus import Api, Resource, fields
 from werkzeug.contrib.fixers import ProxyFix
 
 from random import randint
 from time import clock
 from datetime import datetime
+
+import skimage.io as io
 
 from scipy import misc
 from skimage import filters#, color, io
@@ -23,7 +29,15 @@ from skimage.segmentation import felzenszwalb
 from skimage.segmentation import mark_boundaries
 from skimage.exposure import histogram
 
-app = Flask(__name__)
+if getattr(sys, 'frozen', False):
+    template_folder = os.path.join(sys._MEIPASS, 'templates')
+    app = Flask(__name__, template_folder=template_folder)
+else:
+#    template_folder = os.path.join(sys._MEIPASS, 'templates')
+    app = Flask(__name__)
+
+#app = Flask(__name__)
+
 app.wsgi_app = ProxyFix(app.wsgi_app)
 api = Api(app, version='1.0', title='Fototuvastus API',
     description='Meeskonnaprojekt: Fototuvastus',)
@@ -386,11 +400,10 @@ def main():
 class Detection(Resource):
     @ns.doc('Detect image')
     def get(self):
-        return {"hello":"world"}
+        return {"hello":"world - fototuvastus"}
 
 if __name__ == '__main__':
     app.run()
     main()
-
     timeLeft = (clock() - startTime) #arvutab kulunud aja
     print("Time left: {} sec".format(timeLeft))
