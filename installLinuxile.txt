@@ -15,7 +15,14 @@ sudo apt-get install cmake
 pip3 install dlib
 
 pip3 install scikit-image
+<<<<<<< .mine
 pip3 install matplotlib
+pip3 install numpy
+||||||| .r45
+pip3 install numpy
+=======
+pip3 install matplotlib
+>>>>>>> .r47
 pip3 install exifread 
 
 pip3 install flask
