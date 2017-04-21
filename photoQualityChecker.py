@@ -454,7 +454,7 @@ class Detection(Resource):
 """
     
 if __name__ == '__main__':
-    app.run()
+    app.run(host="52.169.79.192", port=int("80"),)
     main()
     timeLeft = (clock() - startTime) #arvutab kulunud aja
     print("Time left: {} sec".format(timeLeft))
