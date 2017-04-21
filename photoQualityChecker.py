@@ -10,17 +10,19 @@ import numpy as np
 import matplotlib.pyplot as plt
 import exifread
 
-from flask import Flask
+from flask import Flask, request
 #import flask_restplus.api as Api
 #import flask_restplus.resource as Resource
 from flask_restplus import Api, Resource, fields
 from werkzeug.contrib.fixers import ProxyFix
+import base64
+import io
 
 from random import randint
 from time import clock
 from datetime import datetime
 
-import skimage.io as io
+#import skimage.io as io
 
 from scipy import misc
 from skimage import filters#, color, io
@@ -131,15 +133,14 @@ def checkOverExposure(img):
     plt.title("Histogram with 'auto' bins")
     plt.show()    
         
-def checkPhotoAge(fileName):
+def checkPhotoAge(data):
     try:
         allowedAge = float(config['photoAge']['allowedAge'])        
-        fn = open(fileName, 'rb')
-        tags = exifread.process_file(fn)
-        kuupString = str(tags['EXIF DateTimeOriginal'])
-        dte = datetime.strptime(kuupString, '%Y:%m:%d %H:%M:%S')
-        tday = (datetime.now())
-        if ((datetime.date(tday) -datetime.date(dte)).days) >= allowedAge:
+        tags = exifread.process_file(data, details=False, stop_tag='EXIF DateTimeOriginal')
+#        kuupString = str(tags['EXIF DateTimeOriginal'])
+#        dte = datetime.strptime(kuupString, '%Y:%m:%d %H:%M:%S')
+        dte = datetime.strptime(str(tags['EXIF DateTimeOriginal']), "%Y:%m:%d %H:%M:%S")
+        if ((datetime.date(datetime.now()) - datetime.date(dte)).days) >= allowedAge:
             return False
         else:
             return True
@@ -324,7 +325,7 @@ def checkFaceTooLarge(img, detection):
     except:
         return False
 
-def runDetect(img, f):
+def runDetect(data):
     dir = os.path.dirname(__file__)
     predictor_path = os.path.join(dir, 'shape_predictor_68_face_landmarks.dat')
     result = Results()
@@ -337,6 +338,13 @@ def runDetect(img, f):
     
 #    win.clear_overlay()
 #    win.set_image(img)        
+
+    d2 = io.BytesIO(data)
+    result.photoage = checkPhotoAge(d2)
+    print ("Photo age is OK: {}".format(result.photoage))
+
+    img = misc.imread(d2, False, 'RGB')
+    d2.close()
                    
     result.dimensions = checkPhotoDimensions(img)
     print ("Photo minimal dimensions OK: {}".format(result.dimensions))
@@ -348,9 +356,6 @@ def runDetect(img, f):
     print ("Photo brightness is OK: {}".format(result.brightness))
 
 #            checkOverExposure(img)
-    
-    result.photoage = checkPhotoAge(f)
-    print ("Photo age is OK: {}".format(result.photoage))
     
     # Ask the detector to find the bounding boxes of each face. The 1 in the
     # second argument indicates that we should upsample the image 1 time. This
@@ -419,17 +424,37 @@ def main():
         #    print(f)
         #for f in glob.glob(os.path.join(faces_folder_path, "*.jpg")):
             print("\nProcessing file: {}".format(f))
-            img = misc.imread(f, False, 'RGB')
-            runDetect(img, f)
+            fi = open(f, "rb")
+            data = fi.read()
+            
+#            img = misc.imread(d2, False, 'RGB')
+            runDetect(data)
 
 @ns.route('/start')
 class Detection(Resource):
+    @ns.doc('Process image')
+    def post(self):
+        json_data = request.get_json(force=True)
+        b64 = json_data['base64']
+        data = base64.b64decode(b64)
+        return runDetect(data)
+"""
     @ns.doc('Detect image')
     def get(self):
         return {"hello":"world - fototuvastus"}
-
+"""
+    
+"""
+    @ns.doc('Detect image')
+    def post2(self):
+        json_data = parser.parse_args()
+        b64 = str(json_data['base64'])
+        data = base64.b64decode(b64)
+        return runDetect(data)
+"""
+    
 if __name__ == '__main__':
-#    app.run()
+    app.run()
     main()
     timeLeft = (clock() - startTime) #arvutab kulunud aja
     print("Time left: {} sec".format(timeLeft))
