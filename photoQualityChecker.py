@@ -414,7 +414,7 @@ def runDetect(data):
         result.vertical == False): 
         result.result = False
                 
-    return result
+    return result.__dict__
 
 def main():
     dir = os.path.dirname(__file__)
@@ -424,11 +424,17 @@ def main():
         #    print(f)
         #for f in glob.glob(os.path.join(faces_folder_path, "*.jpg")):
             print("\nProcessing file: {}".format(f))
+"""
             fi = open(f, "rb")
             data = fi.read()
-            
+            b64 = base64.b64encode(data)
+            f2 = open("b64test.txt", "wb")
+            f2.write(b64)
+            fi.close()
+            f2.close()
+"""         
 #            img = misc.imread(d2, False, 'RGB')
-            runDetect(data)
+#            runDetect(data)
 
 resource_fields = api.model('Resource', {
     'base64': fields.String,
@@ -445,8 +451,8 @@ class Detection(Resource):
         return runDetect(data)
     
 if __name__ == '__main__':
-    #app.run() #Comment this line in, for running on localhost
-    app.run(host="0.0.0.0", port=int("80"),)
+    app.run() #Comment this line in, for running on localhost
+    #app.run(host="0.0.0.0", port=int("80"),)
     main()
     timeLeft = (clock() - startTime) #arvutab kulunud aja
     print("Time left: {} sec".format(timeLeft))
