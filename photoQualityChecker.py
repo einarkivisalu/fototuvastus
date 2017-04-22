@@ -430,30 +430,22 @@ def main():
 #            img = misc.imread(d2, False, 'RGB')
             runDetect(data)
 
+resource_fields = api.model('Resource', {
+    'base64': fields.String,
+})
+
 @ns.route('/start')
 class Detection(Resource):
     @ns.doc('Process image')
+    @api.expect(resource_fields)
     def post(self):
         json_data = request.get_json(force=True)
         b64 = json_data['base64']
         data = base64.b64decode(b64)
         return runDetect(data)
-"""
-    @ns.doc('Detect image')
-    def get(self):
-        return {"hello":"world - fototuvastus"}
-"""
-    
-"""
-    @ns.doc('Detect image')
-    def post2(self):
-        json_data = parser.parse_args()
-        b64 = str(json_data['base64'])
-        data = base64.b64decode(b64)
-        return runDetect(data)
-"""
     
 if __name__ == '__main__':
+    #app.run() #Comment this line in, for running on localhost
     app.run(host="0.0.0.0", port=int("80"),)
     main()
     timeLeft = (clock() - startTime) #arvutab kulunud aja
