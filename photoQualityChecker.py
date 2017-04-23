@@ -66,6 +66,11 @@ startTime = clock()
 config = configparser.ConfigParser()
 config.read('config.ini')
 
+dir = os.path.dirname(__file__)
+predictor_path = os.path.join(dir, 'shape_predictor_68_face_landmarks.dat')
+detector = dlib.get_frontal_face_detector()
+predictor = dlib.shape_predictor(predictor_path)
+
 def checkPhotoDimensions(img):
     try:
         photoMinWidth = int(config['dimensions']['photoMinWidth'])
@@ -326,14 +331,10 @@ def checkFaceTooLarge(img, detection):
         return False
 
 def runDetect(data):
-    dir = os.path.dirname(__file__)
-    predictor_path = os.path.join(dir, 'shape_predictor_68_face_landmarks.dat')
     result = Results()
     
 #    faces_folder_path = os.path.join(dir,'images')
 #    print (faces_folder_path)
-    detector = dlib.get_frontal_face_detector()
-    predictor = dlib.shape_predictor(predictor_path)
 #    win = dlib.image_window()
     
 #    win.clear_overlay()
@@ -425,10 +426,12 @@ def main():
         #for f in glob.glob(os.path.join(faces_folder_path, "*.jpg")):
             print("\nProcessing file: {}".format(f))
 """
+# generate base64 encoded text file from each image into the python code directory
             fi = open(f, "rb")
             data = fi.read()
             b64 = base64.b64encode(data)
-            f2 = open("b64test.txt", "wb")
+            b64fn = os.path.splitext(os.path.basename(f))[0] + ".txt"
+            f2 = open(b64fn, "wb")
             f2.write(b64)
             fi.close()
             f2.close()
