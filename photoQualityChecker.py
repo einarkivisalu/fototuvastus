@@ -454,8 +454,8 @@ class Detection(Resource):
         return runDetect(data)
     
 if __name__ == '__main__':
-    app.run() #Comment this line in, for running on localhost
-    #app.run(host="0.0.0.0", port=int("80"),)
+    #app.run() #Comment this line in, for running on localhost
+    app.run(host="0.0.0.0", port=int("80"),)
     main()
     timeLeft = (clock() - startTime) #arvutab kulunud aja
     print("Time left: {} sec".format(timeLeft))
