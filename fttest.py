@@ -2,6 +2,7 @@ import unittest
 import dlib
 
 from skimage import io, color
+from scipy import misc
 from photoQualityChecker import *
 
 class TestMethods(unittest.TestCase):
@@ -9,9 +10,9 @@ class TestMethods(unittest.TestCase):
     @classmethod    
     def setUpClass(self):
         print("setup class")
-        self.img = io.imread("images/Test/002.jpg")
-        self.img2 = io.imread("images/Test/2017-03-13 11.05.44 1469482145957050217_selfie.jpg")
-        self.imgHen = io.imread("images/Test/hendrix2.jpg")
+        self.img = misc.imread("images/Test/002.jpg")
+        self.img2 = misc.imread("images/Test/2017-03-13 11.05.44 1469482145957050217_selfie.jpg")
+        self.imgHen = misc.imread("images/Test/hendrix2.jpg")
         self.predictor_path = os.path.join(os.path.dirname(__file__), 'shape_predictor_68_face_landmarks.dat')
         self.detector = dlib.get_frontal_face_detector()
         self.predictor = dlib.shape_predictor(self.predictor_path)
@@ -21,7 +22,7 @@ class TestMethods(unittest.TestCase):
         self.assertFalse(result)
         
     def test_checkPhotoDimensionsTrue(self):
-        img3 = io.imread("images/Test/2010_0213canada0002fx.jpg ")
+        img3 = misc.imread("images/Test/2010_0213canada0002fx.jpg ")
         result = checkPhotoDimensions(img3)
         self.assertTrue(result)
 
@@ -30,13 +31,13 @@ class TestMethods(unittest.TestCase):
         self.assertTrue(result)
 
     def test_is_colorFalse(self):
-        img3 = io.imread("images/moved/hendrix2.jpg")
+        img3 = misc.imread("images/moved/hendrix2.jpg")
         result = is_color(self.imgHen)
         self.assertFalse(result)
 
 #   vaja on 1 kanaliga must-valget pilti       
     def test_is_colorFalse2(self):
-        img3 = io.imread("images/Test/hendrix.jpg")
+        img3 = misc.imread("images/Test/hendrix.jpg")
         result = is_color(img3)
         self.assertFalse(result)
 
@@ -44,7 +45,7 @@ class TestMethods(unittest.TestCase):
         self.assertTrue(checkFaceQuantity(self.detector(self.img, 1)))
 
     def test_checkFaceQuantityFalse(self):
-        img3 = io.imread("images/Test/ClosedEye.jpg");
+        img3 = misc.imread("images/Test/ClosedEye.jpg");
         self.assertTrue(checkFaceQuantity(self.detector(img3, 1)))
 
 
@@ -103,7 +104,7 @@ class TestMethods(unittest.TestCase):
         self.assertTrue(result)
 
     def test_checkMouthClosedFalse(self):
-        img3 = io.imread("images/Test/red_eye.jpg")
+        img3 = misc.imread("images/Test/red_eye.jpg")
         dets = self.detector(img3, 1)
         for k, d in enumerate(dets):
            result = checkMouthClosed(self.predictor(img3, d), d)
@@ -128,7 +129,7 @@ class TestMethods(unittest.TestCase):
         self.assertTrue(result)
         
     def test_checkFaceTooLargeFalse(self):
-        img3 = io.imread("images/Test/pO4QXG7RJAYK.jpg")
+        img3 = misc.imread("images/Test/pO4QXG7RJAYK.jpg")
         dets = self.detector(img3, 1)
         for k, d in enumerate(dets):
            result = checkFaceTooLarge(img3, d)
@@ -138,15 +139,60 @@ class TestMethods(unittest.TestCase):
         self.assertTrue(checkBrightness(self.img))
         
     def test_checkBrightnessFalse(self):
-        img3 = io.imread("images/Test/overexposed2.jpg")
+        img3 = misc.imread("images/Test/overexposed2.jpg")
         self.assertFalse(checkBrightness(img3))
         
     def test_checkBackgroundObjectsTrue(self):
         self.assertTrue(checkBackgroundObjects(self.img))
         
     def test_checkBackgroundObjectsFalse(self):
-        img3 = io.imread("images/Test/sester.jpg")
+        img3 = misc.imread("images/Test/sester.jpg")
         self.assertFalse(checkBackgroundObjects(img3))
+
+#    def test_checkPhotoAgeTrue(self):
+        
+    def test_checkPhotoAgeFalse(self):
+        self.assertTrue(checkPhotoAge(self.img))
+ 
+    def test_checkPhotoAgeNA(self):
+        img3 = misc.imread("images/Test/002.tif")
+        self.assertEqual(checkPhotoAge(self.img), "No EXIF data")
+    
+    def test_runDetectJpg(self):
+        f = open("images/Test/002.jpg", "rb")
+        data = f.read()
+        f.close()
+        res = runDetect(data)
+        self.assertFalse(res['result'])
+        self.assertFalse(res['photoage'])
+        self.assertTrue(res['straight'])
+        
+    def test_runDetectPng(self):
+        f = open("images/Test/002.png", "rb")
+        data = f.read()
+        f.close()
+        res = runDetect(data)
+        self.assertFalse(res['result'])
+        self.assertEqual(res['photoage'], 'No EXIF data')
+        self.assertTrue(res['straight'])
+        
+    def test_runDetectBmp(self):
+        f = open("images/Test/002.bmp", "rb")
+        data = f.read()
+        f.close()
+        res = runDetect(data)
+        self.assertFalse(res['result'])
+        self.assertEqual(res['photoage'], 'No EXIF data')
+        self.assertTrue(res['straight'])
+        
+    def test_runDetectTif(self):
+        f = open("images/Test/002.tif", "rb")
+        data = f.read()
+        f.close()
+        res = runDetect(data)
+        self.assertFalse(res['result'])
+        self.assertEqual(res['photoage'], 'No EXIF data')
+        self.assertTrue(res['straight'])
         
 if __name__ == '__main__':
     unittest.main()
