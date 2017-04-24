@@ -330,6 +330,9 @@ def checkFaceTooLarge(img, detection):
     except:
         return False
 
+#TODO: exception handling if file loading fails in this method
+#TODO: what should be returned when this method fails ? 
+#TODO: remove print() from final version
 def runDetect(data):
     result = Results()
     
