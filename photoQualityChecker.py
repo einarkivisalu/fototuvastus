@@ -36,15 +36,15 @@ class Results:
     dimensions = True
     color = True
     brightness = True 
-    photoage = True
-    facequantity = True
-    facecenter = True
+    photoAge = True
+    faceQuantity = True
+    faceCenter = True
     vertical = True
-    eyesheight = True
+    eyesHeight = True
     straight = True
-    mouthclosed = True
-    facesmall = True
-    facelarge = True
+    mouthClosed = True
+    faceNotSmall = True
+    faceNotLarge = True
     background = True    
 
 if getattr(sys, 'frozen', False):
@@ -378,8 +378,8 @@ def runDetect(data):
         # Get the landmarks/parts for the face in box d.
         shape = predictor(img, d)
 
-        result.facecenter = checkFaceCenterToImage(img,shape)
-        print ("Face centering: {}".format(result.facecenter))
+        result.faceCenter = checkFaceCenterToImage(img,shape)
+        print ("Face centering: {}".format(result.faceCenter))
         
         result.vertical = checkFaceVerticalAxe(shape, d)
         print ("Face verticality: {}".format(result.vertical))
@@ -387,17 +387,17 @@ def runDetect(data):
         result.straight = checkFaceStraight(shape)
         print ("Face is straight: {}".format(result.straight))
         
-        result.eyesheight = checkEyesHeight(img,shape)
-        print ("Eyes height correct: {}".format(result.eyesheight))
+        result.eyesHeight = checkEyesHeight(img,shape)
+        print ("Eyes height correct: {}".format(result.eyesHeight))
         
-        result.mouthclosed = checkMouthClosed(shape, d)
-        print ("Mouth is closed: {}".format(result.mouthclosed))
+        result.mouthClosed = checkMouthClosed(shape, d)
+        print ("Mouth is closed: {}".format(result.mouthClosed))
         
-        result.facesmall = checkFaceTooSmall(img,d)
-        print ("Face not small: {}".format(result.facesmall))        
+        result.faceNotSmall = checkFaceTooSmall(img,d)
+        print ("Face not small: {}".format(result.faceNotSmall))        
         
-        result.facelarge = checkFaceTooLarge(img,d)
-        print ("Face not large: {}".format(result.facelarge)) 
+        result.faceNotLarge = checkFaceTooLarge(img,d)
+        print ("Face not large: {}".format(result.faceNotLarge)) 
         
 #        eyesOpendB = checkEyesOpen(shape, d)
 #        print ("Eyes are open: {}".format(eyesOpendB))
@@ -411,10 +411,10 @@ def runDetect(data):
     #input("Press Enter to continue...")   
     if (result.background == False or result.brightness == False or
         result.color == False or result.dimensions == False or 
-        result.eyesheight == False or result.facecenter == False or
-        result.facelarge == False or result.facequantity == False or 
-        result.facesmall == False or result.mouthclosed == False or
-        result.photoage == False or result.straight == False or 
+        result.eyesHeight == False or result.faceCenter == False or
+        result.faceNotLarge == False or result.faceQuantity == False or 
+        result.faceNotSmall == False or result.mouthClosed == False or
+        result.photoAgee == False or result.straight == False or 
         result.vertical == False): 
         result.result = False
                 
