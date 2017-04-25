@@ -414,7 +414,7 @@ def runDetect(data):
         result.eyesHeight == False or result.faceCenter == False or
         result.faceNotLarge == False or result.faceQuantity == False or 
         result.faceNotSmall == False or result.mouthClosed == False or
-        result.photoAgee == False or result.straight == False or 
+        result.photoAge == False or result.straight == False or 
         result.vertical == False): 
         result.result = False
                 
