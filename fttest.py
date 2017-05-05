@@ -1,7 +1,7 @@
 import unittest 
 import dlib
 
-from skimage import io, color
+#from skimage import io, color
 from scipy import misc
 from photoQualityChecker import *
 

@@ -4,7 +4,7 @@
 import os
 import sys
 import dlib
-import glob
+#import glob
 import configparser
 import numpy as np
 import matplotlib.pyplot as plt
@@ -19,18 +19,19 @@ import base64
 import io
 
 from random import randint
-from time import clock
+#from time import clock
 from datetime import datetime
 
 #import skimage.io as io
 
 from scipy import misc
-from skimage import filters#, color, io
+#from skimage import filters#, color, io
 from skimage.color import rgb2gray
 from skimage.segmentation import felzenszwalb
-from skimage.segmentation import mark_boundaries
+#from skimage.segmentation import mark_boundaries
 from skimage.exposure import histogram
 
+# structure for data fields that are returned as response json maessage
 class Results:
     result = True
     dimensions = True
@@ -46,6 +47,7 @@ class Results:
     faceNotSmall = True
     faceNotLarge = True
     background = True    
+    fileError = False
 
 if getattr(sys, 'frozen', False):
     template_folder = os.path.join(sys._MEIPASS, 'templates')
@@ -54,15 +56,13 @@ else:
 #    template_folder = os.path.join(sys._MEIPASS, 'templates')
     app = Flask(__name__)
 
-#app = Flask(__name__)
-
 app.wsgi_app = ProxyFix(app.wsgi_app)
 api = Api(app, version='1.0', title='Fototuvastus API',
     description='Meeskonnaprojekt: Fototuvastus',)
 
 ns = api.namespace('detect', description='Face detection')
 
-startTime = clock()
+#startTime = clock()
 config = configparser.ConfigParser()
 config.read('config.ini')
 
@@ -71,6 +71,7 @@ predictor_path = os.path.join(dir, 'shape_predictor_68_face_landmarks.dat')
 detector = dlib.get_frontal_face_detector()
 predictor = dlib.shape_predictor(predictor_path)
 
+# checks whether photo dimensions are more than required minimum values
 def checkPhotoDimensions(img):
     try:
         photoMinWidth = int(config['dimensions']['photoMinWidth'])
@@ -84,7 +85,8 @@ def checkPhotoDimensions(img):
             return False
     except:
         return False
-                  
+
+# checks whether randomly selected pixels on the image are all grey 
 def is_color(img):
     try:
         pixelsCount = int(config['is_color']['pixelsCount'])
@@ -108,13 +110,13 @@ def is_color(img):
     except:
         return False
     
+# checks whether image brightness falls within the allowed limits
 def checkBrightness(img):
     try:
         minBrightness = int(config['brightness']['minBrightness'])
         maxBrightness = int(config['brightness']['maxBrightness'])    
         meanBrightness = (np.mean(img))
 #        print ("  Photo mean brightness: ", meanBrightness)
-
 #        result = filters.exposure.adjust_gamma(img, 2)
 #        print (result)
         
@@ -125,6 +127,7 @@ def checkBrightness(img):
     except:
         return ("error", False)
 
+# checks whether image histogram shows the signs of overexposure
 def checkOverExposure(img):
     a = histogram(img.ravel())
 #    print (a[0])
@@ -138,6 +141,7 @@ def checkOverExposure(img):
     plt.title("Histogram with 'auto' bins")
     plt.show()    
         
+# reads the image creation date if image conatains EXIF data 
 def checkPhotoAge(data):
     try:
         allowedAge = float(config['photoAge']['allowedAge'])        
@@ -151,7 +155,8 @@ def checkPhotoAge(data):
             return True
     except:
         return "No EXIF data"
-        
+
+# checks that nose is on the image central axis 
 def checkFaceCenterToImage(img,shape):
     try:
         axeMinCoeff = float(config['faceCenter']['axeMinCoeff'])
@@ -165,7 +170,7 @@ def checkFaceCenterToImage(img,shape):
     except:
         return False
 
-
+# checks that only one face is detected on the image 
 def checkFaceQuantity(dets):
     try:
         if len(dets) == 1:
@@ -175,6 +180,7 @@ def checkFaceQuantity(dets):
     except:
         return False
 
+# checks whether nose and chin are in on the same vertical axis
 def checkFaceVerticalAxe(shape, detection):
     try:
         maxTiltLimit = float(config['faceVerticality']['maxTiltLimit'])
@@ -188,6 +194,7 @@ def checkFaceVerticalAxe(shape, detection):
     except:
         return False            
         
+# checks whether nose location is symmetric to the detected face central axis 
 def checkFaceStraight(shape):
     try:
         faceAssymmetryConstant = float(config['faceAssymmetry']['faceAssymmetryConstant'])    
@@ -203,7 +210,7 @@ def checkFaceStraight(shape):
     except:
         return False
 
-# height of 50–70% of the total vertical length of the photo
+# checks whether the eye corners are within the allowed limits 
 def checkEyesHeight(img,shape):
     try:
         eyesMinHeight = float(config['eyesHeight']['eyesMinHeight'])
@@ -220,35 +227,22 @@ def checkEyesHeight(img,shape):
     except:
         return False            
         
+# checks whether the distance between lip coordinates is over the limit
 def checkMouthClosed(shape, detection):
     try:
         mouthOpenLimit = float(config['mouthClosed']['mouthOpenLimit'])    
         upperLipY= shape.part(66).y
         lowerLipY= shape.part(62).y
         mouthOpenFactor= (upperLipY-lowerLipY)/detection.height()
-    #    print (mouthOpenFactor)
+#        print (mouthOpenFactor)
         if mouthOpenFactor <= mouthOpenLimit:
             return True
         else:
             return False
     except:
         return False
-
-#TODO Kuna silmade detekteerimine ei ole väga hea, siis see lahendus ei toimi.
-def checkEyesOpen(shape, detection):
-    try:
-        return "Not checked yet"
-    except:
-        return False        
-
-#TODO 
-def checkRedEyes(shape, detection):
-    try:
-#    leftEyeRectangle = shape.part(37).y 
-        return "Not checked yet"
-    except:
-        return False
  
+# checks whether there are color changes in the image upper coreners using Felzenszwalb method
 def checkBackgroundObjects(img):
     try:
         upperRectangleHeight = float(config['backGround']['upperRectangleHeight'])
@@ -306,6 +300,7 @@ def checkBackgroundObjects(img):
     except:
         return False
     
+# checks whether the face size is under the allowed limits
 def checkFaceTooSmall(img, detection):
     try:
         faceSizeMinFactor = float(config['faceDimensions']['faceSizeMinFactor'])
@@ -317,7 +312,8 @@ def checkFaceTooSmall(img, detection):
             return True
     except:
         return False
-            
+
+# checks whether the face size is over the allowed limits
 def checkFaceTooLarge(img, detection):
     try:
         faceSizeMaxFactor = float(config['faceDimensions']['faceSizeMaxFactor'])    
@@ -329,35 +325,43 @@ def checkFaceTooLarge(img, detection):
             return True
     except:
         return False
-
-#TODO: exception handling if file loading fails in this method
-#TODO: what should be returned when this method fails ? 
-#TODO: remove print() from final version
+    
+# main detection function - calls to the 'check' functions to do the actual checking 
 def runDetect(data):
     result = Results()
     
 #    faces_folder_path = os.path.join(dir,'images')
 #    print (faces_folder_path)
 #    win = dlib.image_window()
-    
 #    win.clear_overlay()
 #    win.set_image(img)        
 
-    d2 = io.BytesIO(data)
-    result.photoage = checkPhotoAge(d2)
-    print ("Photo age is OK: {}".format(result.photoage))
+    try:
+        d2 = io.BytesIO(data)
+    except:
+        result.result = False
+        result.fileError = True
+        return result
 
-    img = misc.imread(d2, False, 'RGB')
-    d2.close()
-                   
+    result.photoage = checkPhotoAge(d2)
+#    print ("Photo age is OK: {}".format(result.photoage))
+
+    try:
+        img = misc.imread(d2, False, 'RGB')
+        d2.close()
+    except:
+        result.result = False
+        result.fileError = True
+        return result
+          
     result.dimensions = checkPhotoDimensions(img)
-    print ("Photo minimal dimensions OK: {}".format(result.dimensions))
+#    print ("Photo minimal dimensions OK: {}".format(result.dimensions))
             
     result.color = is_color(img) #checkPhotoColor(img)
-    print ("Photo is color: {}".format(result.color)) 
+#    print ("Photo is color: {}".format(result.color)) 
     
     result.brightness = checkBrightness(img)
-    print ("Photo brightness is OK: {}".format(result.brightness))
+#    print ("Photo brightness is OK: {}".format(result.brightness))
 
 #            checkOverExposure(img)
     
@@ -365,50 +369,45 @@ def runDetect(data):
     # second argument indicates that we should upsample the image 1 time. This
     # will make everything bigger and allow us to detect more faces.
     dets = detector(img, 1)
-    print("Number of faces detected: {}".format(len(dets)))
+ #   print("Number of faces detected: {}".format(len(dets)))
     
     result.background = checkBackgroundObjects(img)
-    print ("Background correct: {}".format(result.background))
+#    print ("Background correct: {}".format(result.background))
    
     result.facequantity = checkFaceQuantity(dets)
-    print ("Face quantity: {}".format(result.facequantity))
+#    print ("Face quantity: {}".format(result.facequantity))
 
     for k, d in enumerate(dets): 
-        print("\nDetected face No: {}".format(k))
+#        print("\nDetected face No: {}".format(k))
         # Get the landmarks/parts for the face in box d.
         shape = predictor(img, d)
 
         result.faceCenter = checkFaceCenterToImage(img,shape)
-        print ("Face centering: {}".format(result.faceCenter))
+#        print ("Face centering: {}".format(result.faceCenter))
         
         result.vertical = checkFaceVerticalAxe(shape, d)
-        print ("Face verticality: {}".format(result.vertical))
+#        print ("Face verticality: {}".format(result.vertical))
      
         result.straight = checkFaceStraight(shape)
-        print ("Face is straight: {}".format(result.straight))
+#        print ("Face is straight: {}".format(result.straight))
         
         result.eyesHeight = checkEyesHeight(img,shape)
-        print ("Eyes height correct: {}".format(result.eyesHeight))
+#        print ("Eyes height correct: {}".format(result.eyesHeight))
         
         result.mouthClosed = checkMouthClosed(shape, d)
-        print ("Mouth is closed: {}".format(result.mouthClosed))
+#        print ("Mouth is closed: {}".format(result.mouthClosed))
         
         result.faceNotSmall = checkFaceTooSmall(img,d)
-        print ("Face not small: {}".format(result.faceNotSmall))        
+#        print ("Face not small: {}".format(result.faceNotSmall))        
         
         result.faceNotLarge = checkFaceTooLarge(img,d)
-        print ("Face not large: {}".format(result.faceNotLarge)) 
+#        print ("Face not large: {}".format(result.faceNotLarge)) 
         
-#        eyesOpendB = checkEyesOpen(shape, d)
-#        print ("Eyes are open: {}".format(eyesOpendB))
         
-#        redEyesB = checkRedEyes(shape, d)
-#        print ("Red eyes not detected: {}".format(redEyesB))
-        
-        # Draw the face landmarks on the screen.
-#                win.add_overlay(shape)
-#            win.add_overlay(dets)    
-    #input("Press Enter to continue...")   
+#       Draw the face landmarks on the screen.
+#        win.add_overlay(shape)
+#        win.add_overlay(dets)    
+#        input("Press Enter to continue...")   
     if (result.background == False or result.brightness == False or
         result.color == False or result.dimensions == False or 
         result.eyesHeight == False or result.faceCenter == False or
@@ -417,19 +416,27 @@ def runDetect(data):
         result.photoAge == False or result.straight == False or 
         result.vertical == False): 
         result.result = False
+    else:
+        result.result = True
                 
     return result.__dict__
 
+# currently unused
 def main():
     dir = os.path.dirname(__file__)
+# do the image detection with all the image files on the specified path
+"""
     for f in glob.glob(os.path.join(dir, 'images',"*.*")):
         extension = os.path.splitext(f)[1]
         if extension == ".jpg" or extension == ".jpeg" or extension == ".png" or extension == ".tif" or extension == ".tiff" or extension == ".bmp":
-        #    print(f)
-        #for f in glob.glob(os.path.join(faces_folder_path, "*.jpg")):
+            print(f)
+            for f in glob.glob(os.path.join(faces_folder_path, "*.jpg")):
             print("\nProcessing file: {}".format(f))
-"""
+            img = misc.imread(d2, False, 'RGB')
+            runDetect(data)
+"""            
 # generate base64 encoded text file from each image into the python code directory
+"""
             fi = open(f, "rb")
             data = fi.read()
             b64 = base64.b64encode(data)
@@ -439,8 +446,6 @@ def main():
             fi.close()
             f2.close()
 """         
-#            img = misc.imread(d2, False, 'RGB')
-#            runDetect(data)
 
 resource_fields = api.model('Resource', {
     'base64': fields.String,
@@ -451,14 +456,20 @@ class Detection(Resource):
     @ns.doc('Process image')
     @api.expect(resource_fields)
     def post(self):
-        json_data = request.get_json(force=True)
-        b64 = json_data['base64']
-        data = base64.b64decode(b64)
-        return runDetect(data)
+        try:
+            json_data = request.get_json(force=True)
+            b64 = json_data['base64']
+            data = base64.b64decode(b64)
+            return runDetect(data)
+        except:
+            result = Results();
+            result.result = False;
+            result.fileError = True;
+            return result.__dict__
     
 if __name__ == '__main__':
-    #app.run() #Comment this line in, for running on localhost
-    app.run(host="0.0.0.0", port=int("80"),)
+    app.run() #Comment this line in, for running on localhost
+#    app.run(host="0.0.0.0", port=int("80"),)
     main()
-    timeLeft = (clock() - startTime) #arvutab kulunud aja
-    print("Time left: {} sec".format(timeLeft))
+#    timeLeft = (clock() - startTime) #arvutab kulunud aja
+#    print("Time left: {} sec".format(timeLeft))
