@@ -117,16 +117,7 @@ def checkBrightness(img):
         else:
             return False
     except:
-        return ("error", False)
-
-# checks whether image histogram shows the signs of overexposure
-def checkOverExposure(img):
-    a = histogram(img.ravel())
-    rng = histogram(img) #np.random.RandomState(10)  # deterministic random data
-    a = np.hstack((rng[0]))#.normal(size=1000),rng[0]))#.normal(loc=5, scale=2, size=1000)))
-    plt.hist(a, bins='auto')  # plt.hist passes it's arguments to np.histogram
-    plt.title("Histogram with 'auto' bins")
-    plt.show()    
+        return ("error", False) 
         
 # reads the image creation date if image conatains EXIF data 
 def checkPhotoAge(data):
@@ -220,6 +211,7 @@ def checkBackgroundObjects(img):
         imageHeight = (img.shape[0])    
         imageWidth = (img.shape[1])
         
+		#3 pixels from border
         img1 = img[3:int(imageHeight*outsideRectangleHeight), 3:int(imageWidth*outsideRectangleWidth)]
         img2 = img[3:int(imageHeight*upperRectangleHeight), 3:int(imageWidth*upperRectangleWidth)]
         img3 = img[3:int(imageHeight*outsideRectangleHeight), imageWidth-int(imageWidth*outsideRectangleWidth):int(imageWidth-3)]
@@ -290,8 +282,6 @@ def runDetect(data):
     
     # Photo brightness is OK
     result.brightness = checkBrightness(img)
-
-#            checkOverExposure(img)
     
     # Ask the detector to find the bounding boxes of each face. The 1 in the
     # second argument indicates that we should upsample the image 1 time. This
