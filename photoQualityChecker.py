@@ -11,8 +11,6 @@ import matplotlib.pyplot as plt
 import exifread
 
 from flask import Flask, request
-#import flask_restplus.api as Api
-#import flask_restplus.resource as Resource
 from flask_restplus import Api, Resource, fields
 from werkzeug.contrib.fixers import ProxyFix
 import base64
@@ -79,10 +77,7 @@ def checkPhotoDimensions(img):
         
         imageHeight = (img.shape[0])    
         imageWidth = (img.shape[1])
-        if imageWidth >= photoMinWidth and imageHeight >= photoMinHeight:
-            return True
-        else:
-            return False
+        return imageWidth >= photoMinWidth and imageHeight >= photoMinHeight
     except:
         return False
 
@@ -116,9 +111,6 @@ def checkBrightness(img):
         minBrightness = int(config['brightness']['minBrightness'])
         maxBrightness = int(config['brightness']['maxBrightness'])    
         meanBrightness = (np.mean(img))
-#        print ("  Photo mean brightness: ", meanBrightness)
-#        result = filters.exposure.adjust_gamma(img, 2)
-#        print (result)
         
         if minBrightness <= meanBrightness <= maxBrightness:
             return True
@@ -130,11 +122,6 @@ def checkBrightness(img):
 # checks whether image histogram shows the signs of overexposure
 def checkOverExposure(img):
     a = histogram(img.ravel())
-#    print (a[0])
-#    print (a[0].sum())
-#    print (a[1].sum())
-#    b = np.hstack((a[0].normal(size=1000),a[0].normal(loc=5, scale=2, size=1000)))
-#    plt.a(b,bins='auto')
     rng = histogram(img) #np.random.RandomState(10)  # deterministic random data
     a = np.hstack((rng[0]))#.normal(size=1000),rng[0]))#.normal(loc=5, scale=2, size=1000)))
     plt.hist(a, bins='auto')  # plt.hist passes it's arguments to np.histogram
@@ -146,13 +133,8 @@ def checkPhotoAge(data):
     try:
         allowedAge = float(config['photoAge']['allowedAge'])        
         tags = exifread.process_file(data, details=False, stop_tag='EXIF DateTimeOriginal')
-#        kuupString = str(tags['EXIF DateTimeOriginal'])
-#        dte = datetime.strptime(kuupString, '%Y:%m:%d %H:%M:%S')
         dte = datetime.strptime(str(tags['EXIF DateTimeOriginal']), "%Y:%m:%d %H:%M:%S")
-        if ((datetime.date(datetime.now()) - datetime.date(dte)).days) >= allowedAge:
-            return False
-        else:
-            return True
+        return ((datetime.date(datetime.now()) - datetime.date(dte)).days) >= allowedAge
     except:
         return "No EXIF data"
 
@@ -163,20 +145,14 @@ def checkFaceCenterToImage(img,shape):
         axeMaxCoeff = float(config['faceCenter']['axeMaxCoeff'])    
         imageWidth = (len((img)[0]))
         axeCoeff = (imageWidth/shape.part(27).x) #nose upper point
-        if axeMinCoeff <= axeCoeff <= axeMaxCoeff:
-            return True
-        else:
-            return False
+        return axeMinCoeff <= axeCoeff <= axeMaxCoeff
     except:
         return False
 
 # checks that only one face is detected on the image 
 def checkFaceQuantity(dets):
     try:
-        if len(dets) == 1:
-            return True
-        else:
-            return False
+        return len(dets) == 1
     except:
         return False
 
@@ -187,10 +163,7 @@ def checkFaceVerticalAxe(shape, detection):
         chinBottomPoint = shape.part(8).x # (l6ug)
         noseUpperPoint = shape.part(27).x #ninajuur
         faceAxe = abs(chinBottomPoint - noseUpperPoint)/detection.width()
-        if faceAxe <= maxTiltLimit:
-            return True
-        else:
-            return False
+        return faceAxe <= maxTiltLimit
     except:
         return False            
         
@@ -203,10 +176,7 @@ def checkFaceStraight(shape):
         faceWeight = shape.part(15).x - shape.part(1).x
         faceAssymmetry = abs(leftSideDistance - rightSideDistance)  
         faceStraightFactor = faceAssymmetry / faceWeight
-        if faceStraightFactor <= faceAssymmetryConstant:
-            return True
-        else:
-            return False
+        return faceStraightFactor <= faceAssymmetryConstant
     except:
         return False
 
@@ -220,10 +190,7 @@ def checkEyesHeight(img,shape):
         eyesHeightLine = (leftEyeLeftPoint + rightEyeRightPoint)/2
         imageHeight = (img.shape[0])    
         eyesHeightFactor = (1-eyesHeightLine/imageHeight)
-        if eyesMinHeight <= eyesHeightFactor <= eyesMaxHeight:
-            return True
-        else:
-            return False
+        return eyesMinHeight <= eyesHeightFactor <= eyesMaxHeight
     except:
         return False            
         
@@ -234,11 +201,7 @@ def checkMouthClosed(shape, detection):
         upperLipY= shape.part(66).y
         lowerLipY= shape.part(62).y
         mouthOpenFactor= (upperLipY-lowerLipY)/detection.height()
-#        print (mouthOpenFactor)
-        if mouthOpenFactor <= mouthOpenLimit:
-            return True
-        else:
-            return False
+        return mouthOpenFactor <= mouthOpenLimit
     except:
         return False
  
@@ -262,7 +225,6 @@ def checkBackgroundObjects(img):
         img3 = img[3:int(imageHeight*outsideRectangleHeight), imageWidth-int(imageWidth*outsideRectangleWidth):int(imageWidth-3)]
         img4 = img[3:int(imageHeight*upperRectangleHeight), imageWidth-int(imageWidth*upperRectangleWidth):imageWidth-3]
     
-    #    segments_fz = felzenszwalb(img, scale=300, sigma=2.2, min_size=80)  #whole img
         segments_fz1 = felzenszwalb(img1, scale, sigma, min_size)
         segments_fz2 = felzenszwalb(img2, scale, sigma, min_size)
         segments_fz3 = felzenszwalb(img3, scale, sigma, min_size)
@@ -273,30 +235,8 @@ def checkBackgroundObjects(img):
         segmentsCount3 = (len(np.unique(segments_fz3)))
         segmentsCount4 = (len(np.unique(segments_fz4)))
         sumSegmentsCount = segmentsCount1 + segmentsCount2 + segmentsCount3 + segmentsCount4
-    
-        """    
-        print("Felzenszwalb number of corner segments: {}".format(sumSegmentsCount))
         
-        fig, ax = plt.subplots(2, 2, figsize=(10, 10), sharex=True, sharey=True,
-                               subplot_kw={'adjustable': 'box-forced'})
-        
-        ax[0, 0].imshow(mark_boundaries(img1, segments_fz1, (100,20,100)))
-        ax[0, 0].imshow(mark_boundaries(img2, segments_fz2, (100,20,100)))    
-        ax[0, 0].set_title("Felzenszwalbs's method, vasak ylemine nurk")    
-        
-        ax[0, 1].imshow(mark_boundaries(img3, segments_fz3, (100,100,10)))
-        ax[0, 1].imshow(mark_boundaries(img4, segments_fz4, (100,100,10)))    
-        ax[0, 1].set_title("Felzenszwalbs's method, parem ylemine nurk")  
-        
-        ax[1, 0].imshow(mark_boundaries(img, segments_fz, (100,20,50)))
-         
-        plt.tight_layout()
-        plt.show()
-        """
-        if sumSegmentsCount >4:
-            return False
-        else:
-            return True    
+        return sumSegmentsCount >4    
     except:
         return False
     
@@ -306,10 +246,7 @@ def checkFaceTooSmall(img, detection):
         faceSizeMinFactor = float(config['faceDimensions']['faceSizeMinFactor'])
         imageWidth = (len((img)[0]))
         faceSizeFactor = imageWidth/detection.width()
-        if faceSizeFactor >= faceSizeMinFactor:
-            return False
-        else:
-            return True
+        return faceSizeFactor >= faceSizeMinFactor
     except:
         return False
 
@@ -319,22 +256,13 @@ def checkFaceTooLarge(img, detection):
         faceSizeMaxFactor = float(config['faceDimensions']['faceSizeMaxFactor'])    
         imageWidth = (len((img)[0]))
         faceSizeFactor = imageWidth/detection.width()
-        if faceSizeFactor <= faceSizeMaxFactor:
-            return False
-        else:
-            return True
+        return faceSizeFactor <= faceSizeMaxFactor
     except:
         return False
     
 # main detection function - calls to the 'check' functions to do the actual checking 
 def runDetect(data):
-    result = Results()
-    
-#    faces_folder_path = os.path.join(dir,'images')
-#    print (faces_folder_path)
-#    win = dlib.image_window()
-#    win.clear_overlay()
-#    win.set_image(img)        
+    result = Results()    
 
     try:
         d2 = io.BytesIO(data)
@@ -343,8 +271,8 @@ def runDetect(data):
         result.fileError = True
         return result
 
+        # Photo age
     result.photoage = checkPhotoAge(d2)
-#    print ("Photo age is OK: {}".format(result.photoage))
 
     try:
         img = misc.imread(d2, False, 'RGB')
@@ -354,60 +282,56 @@ def runDetect(data):
         result.fileError = True
         return result
           
+    # Photo minimal dimensions
     result.dimensions = checkPhotoDimensions(img)
-#    print ("Photo minimal dimensions OK: {}".format(result.dimensions))
             
+    # Photo has color, not grayscale
     result.color = is_color(img) #checkPhotoColor(img)
-#    print ("Photo is color: {}".format(result.color)) 
     
+    # Photo brightness is OK
     result.brightness = checkBrightness(img)
-#    print ("Photo brightness is OK: {}".format(result.brightness))
 
 #            checkOverExposure(img)
     
     # Ask the detector to find the bounding boxes of each face. The 1 in the
     # second argument indicates that we should upsample the image 1 time. This
     # will make everything bigger and allow us to detect more faces.
+    # Number of faces detected
     dets = detector(img, 1)
- #   print("Number of faces detected: {}".format(len(dets)))
     
+    # Background correct
     result.background = checkBackgroundObjects(img)
-#    print ("Background correct: {}".format(result.background))
    
+    # Face quantity
     result.facequantity = checkFaceQuantity(dets)
-#    print ("Face quantity: {}".format(result.facequantity))
 
     for k, d in enumerate(dets): 
-#        print("\nDetected face No: {}".format(k))
         # Get the landmarks/parts for the face in box d.
         shape = predictor(img, d)
 
+        # Face centering
         result.faceCenter = checkFaceCenterToImage(img,shape)
-#        print ("Face centering: {}".format(result.faceCenter))
         
+        # Face verticality
         result.vertical = checkFaceVerticalAxe(shape, d)
-#        print ("Face verticality: {}".format(result.vertical))
      
+        # Face is straight
         result.straight = checkFaceStraight(shape)
-#        print ("Face is straight: {}".format(result.straight))
         
+        # Eyes height correct
         result.eyesHeight = checkEyesHeight(img,shape)
-#        print ("Eyes height correct: {}".format(result.eyesHeight))
         
+        # Mouth is closed
         result.mouthClosed = checkMouthClosed(shape, d)
-#        print ("Mouth is closed: {}".format(result.mouthClosed))
         
-        result.faceNotSmall = checkFaceTooSmall(img,d)
-#        print ("Face not small: {}".format(result.faceNotSmall))        
+        # Face not small
+        result.faceNotSmall = checkFaceTooSmall(img,d)    
         
+        # Face not large
         result.faceNotLarge = checkFaceTooLarge(img,d)
-#        print ("Face not large: {}".format(result.faceNotLarge)) 
         
         
-#       Draw the face landmarks on the screen.
-#        win.add_overlay(shape)
-#        win.add_overlay(dets)    
-#        input("Press Enter to continue...")   
+    # Draw the face landmarks on the screen.
     if (result.background == False or result.brightness == False or
         result.color == False or result.dimensions == False or 
         result.eyesHeight == False or result.faceCenter == False or
@@ -472,4 +396,3 @@ if __name__ == '__main__':
 #    app.run(host="0.0.0.0", port=int("80"),)
     main()
 #    timeLeft = (clock() - startTime) #arvutab kulunud aja
-#    print("Time left: {} sec".format(timeLeft))
