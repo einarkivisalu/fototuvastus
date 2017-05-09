@@ -110,25 +110,25 @@ class TestMethods(unittest.TestCase):
            result = checkMouthClosed(self.predictor(img3, d), d)
         self.assertFalse(result)
 
-    def test_checkFaceTooSmallTrue(self):
+    def test_checkFaceNotTooSmallTrue(self):
         dets = self.detector(self.img, 1)
         for k, d in enumerate(dets):
            result = checkFaceTooSmall(self.img, d)
         self.assertTrue(result)
         
-    def test_checkFaceTooSmallFalse(self):
+    def test_checkFaceNotTooSmallFalse(self):
         dets = self.detector(self.imgHen, 1)
         for k, d in enumerate(dets):
            result = checkFaceTooSmall(self.imgHen, d)
         self.assertFalse(result)
         
-    def test_checkFaceTooLargeTrue(self):
+    def test_checkFaceNotTooLargeTrue(self):
         dets = self.detector(self.img, 1)
         for k, d in enumerate(dets):
            result = checkFaceTooLarge(self.img, d)
         self.assertTrue(result)
         
-    def test_checkFaceTooLargeFalse(self):
+    def test_checkFaceNotTooLargeFalse(self):
         img3 = misc.imread("images/Test/pO4QXG7RJAYK.jpg")
         dets = self.detector(img3, 1)
         for k, d in enumerate(dets):
@@ -164,7 +164,7 @@ class TestMethods(unittest.TestCase):
         f.close()
         res = runDetect(data)
         self.assertFalse(res['result'])
-        self.assertFalse(res['photoage'])
+        self.assertFalse(res['photoAge'])
         self.assertTrue(res['straight'])
         
     def test_runDetectPng(self):
@@ -173,7 +173,7 @@ class TestMethods(unittest.TestCase):
         f.close()
         res = runDetect(data)
         self.assertFalse(res['result'])
-        self.assertEqual(res['photoage'], 'No EXIF data')
+        self.assertEqual(res['photoAge'], 'No EXIF data')
         self.assertTrue(res['straight'])
         
     def test_runDetectBmp(self):
@@ -182,7 +182,7 @@ class TestMethods(unittest.TestCase):
         f.close()
         res = runDetect(data)
         self.assertFalse(res['result'])
-        self.assertEqual(res['photoage'], 'No EXIF data')
+        self.assertEqual(res['photoAge'], 'No EXIF data')
         self.assertTrue(res['straight'])
         
     def test_runDetectTif(self):
@@ -191,7 +191,7 @@ class TestMethods(unittest.TestCase):
         f.close()
         res = runDetect(data)
         self.assertFalse(res['result'])
-        self.assertEqual(res['photoage'], 'No EXIF data')
+        self.assertEqual(res['photoAge'], 'No EXIF data')
         self.assertTrue(res['straight'])
         
 if __name__ == '__main__':

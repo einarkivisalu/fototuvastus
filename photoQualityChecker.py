@@ -125,7 +125,7 @@ def checkPhotoAge(data):
         allowedAge = float(config['photoAge']['allowedAge'])        
         tags = exifread.process_file(data, details=False, stop_tag='EXIF DateTimeOriginal')
         dte = datetime.strptime(str(tags['EXIF DateTimeOriginal']), "%Y:%m:%d %H:%M:%S")
-        return ((datetime.date(datetime.now()) - datetime.date(dte)).days) >= allowedAge
+        return ((datetime.date(datetime.now()) - datetime.date(dte)).days) <= allowedAge
     except:
         return "No EXIF data"
 
@@ -228,27 +228,27 @@ def checkBackgroundObjects(img):
         segmentsCount4 = (len(np.unique(segments_fz4)))
         sumSegmentsCount = segmentsCount1 + segmentsCount2 + segmentsCount3 + segmentsCount4
         
-        return sumSegmentsCount >4    
+        return sumSegmentsCount <=4    
     except:
         return False
     
-# checks whether the face size is under the allowed limits
-def checkFaceTooSmall(img, detection):
+# checks whether the face size is not under the allowed limits
+def checkFaceNotTooSmall(img, detection):
     try:
         faceSizeMinFactor = float(config['faceDimensions']['faceSizeMinFactor'])
         imageWidth = (len((img)[0]))
         faceSizeFactor = imageWidth/detection.width()
-        return faceSizeFactor >= faceSizeMinFactor
+        return faceSizeFactor <= faceSizeMinFactor
     except:
         return False
 
-# checks whether the face size is over the allowed limits
-def checkFaceTooLarge(img, detection):
+# checks whether the face size is not over the allowed limits
+def checkFaceNotTooLarge(img, detection):
     try:
         faceSizeMaxFactor = float(config['faceDimensions']['faceSizeMaxFactor'])    
         imageWidth = (len((img)[0]))
         faceSizeFactor = imageWidth/detection.width()
-        return faceSizeFactor <= faceSizeMaxFactor
+        return faceSizeFactor >= faceSizeMaxFactor
     except:
         return False
     
@@ -264,8 +264,8 @@ def runDetect(data):
         return result
 
         # Photo age
-    result.photoage = checkPhotoAge(d2)
-
+    result.photoAge = checkPhotoAge(d2)
+    
     try:
         img = misc.imread(d2, False, 'RGB')
         d2.close()
@@ -315,10 +315,10 @@ def runDetect(data):
         result.mouthClosed = checkMouthClosed(shape, d)
         
         # Face not small
-        result.faceNotSmall = checkFaceTooSmall(img,d)    
+        result.faceNotSmall = checkFaceNotTooSmall(img,d)    
         
         # Face not large
-        result.faceNotLarge = checkFaceTooLarge(img,d)
+        result.faceNotLarge = checkFaceNotTooLarge(img,d)
         
         
     # Draw the face landmarks on the screen.
@@ -341,14 +341,12 @@ def main():
 # do the image detection with all the image files on the specified path
 """
     for f in glob.glob(os.path.join(dir, 'images',"*.*")):
-        extension = os.path.splitext(f)[1]
         if extension == ".jpg" or extension == ".jpeg" or extension == ".png" or extension == ".tif" or extension == ".tiff" or extension == ".bmp":
             print(f)
-            for f in glob.glob(os.path.join(faces_folder_path, "*.jpg")):
             print("\nProcessing file: {}".format(f))
-            img = misc.imread(d2, False, 'RGB')
-            runDetect(data)
-"""            
+            img = misc.imread(f, False, 'RGB')
+            runDetect(img)
+"""
 # generate base64 encoded text file from each image into the python code directory
 """
             fi = open(f, "rb")
