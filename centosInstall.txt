@@ -1,0 +1,96 @@
+Testitud Centos 7 (Minimal) puhtal paigaldusel
+Minimum requirement 2 GB RAM
+
+Kuna Centos 7 vaikimis varamutes pole Python3 siis lisame selle paigaldamiseks uue varamu: 
+
+    sudo yum install -y https://centos7.iuscommunity.org/ius-release.rpm 
+
+Vajadusel lisame epeli varamu
+    sudo yum install epel-release
+
+Ja paigaldame pythoni  ja pip-i
+
+    sudo yum install -y python36u python36u-pip python36u-devel
+    sudo yum install -y python36u-tkinter
+
+
+Paigaldame cmake ja mõned eeldused
+
+    sudo yum install -y cmake gcc-c++ gcc
+    sudo yum install -y cmake3 // dlib soovi cmake3 versioooni
+
+vajadusel paigaldame wget
+	sudo yum -y install wget
+
+paigaldame libicu** 
+	cd ~
+	wget http://download.icu-project.org/files/icu4c/59.1/icu4c-59_1-src.tgz
+    tar zxvf icu4c-59_1-src.tgz
+    cd icu/source
+    ./configure
+    make
+    sudo make install
+
+paigaldame boosti** 
+	cd ~
+	wget https://sourceforge.net/projects/boost/files/boost/1.61.0/boost_1_61_0.tar.gz
+
+    tar zxvf boost_1_61_0.tar.gz
+    
+    cd boost_1_61_0
+ 
+// ei leia python3.6m kataloogi isegi kui see täpsustada ette.  Kopeerime kausta või loome symlingi.. 
+
+	ln -s /usr/include/python3.6m/ /usr/include/python3.6 
+    // kui tahta paigaldada mujale siis võti --prefix=path/kuhugi
+    ./bootstrap.sh --with-libraries=python --with-python-version=3.6
+    sudo ./b2 install  // paigaldame
+
+lisame teekide envvari boosti pathi, et python selle ülesse leiaks ( püsivaks lisamiseks nt ka bashrc või env faili, muidu restarti üle ei ela.. 
+) 
+
+    export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+    echo 'export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH' >> ~/.bashrc
+  
+
+**dlib** paigaldus ( tahab cmake3  nii et , võtame kodukalt viimase versiooni ja buildime selle ) 
+    cd ~
+    wget http://dlib.net/files/dlib-19.4.tar.bz2
+
+    tar jxf dlib-19.4.tar.bz2  // kui juba ei eksisteeri siis paigalda bzip2 pakett, et lahti pakkida. yum install bzip2 
+
+    cd  dlib-19.4
+
+// kui paigaldada boosti kuhugi mujale kui default kohta.. siis peab täpsustama BOOST_ROOTDIR ja BOOST_LIBRARYDIR env muutujad asukohtadega enne järgmist sammu.. 
+
+    sudo python3.6 setup.py install --cmake /usr/bin/cmake3
+
+Paigaldame vajalikud pythoni teegid
+
+    pip3.6 install scikit-image
+    pip3.6 install exifread 
+    pip3.6 install flask
+    pip3.6 install flask-restplus	
+	
+Laeme projekti alla kas kasutades git-i või githubi lehelt arhiivi alla laadides
+Giti puhul
+
+    sudo yum install git
+
+    cd ~
+    git clone https://github.com/einarkivisalu/fototuvastus
+
+Liigume projekti kasuta.. 
+
+    cd fototuvastus
+
+Vaatame kas programm töötab
+
+    python3.6 photoQualityChecker.py  // vaikimisi jookseb 127.0.0.1:5000   , sama faili lõpus saab vahetada porti ja host-i
+
+Testide käivitamine    
+    python3.6 fftest.py  // peaks läbima kõik testid!
+
+
+
+
