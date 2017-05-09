@@ -1,17 +1,10 @@
 # Fototuvastus
 TTU meeskonnatöö projekt dokumendifotode kvaliteedi hindamiseks.
 
-Pythoni (3.5.2) kood, õpitud dataset nägude tuvastamiseks ja mõningad näitepildid.
+Python3 kood, õpitud dataset nägude tuvastamiseks ja mõningad näitepildid.
 
 Keskkond arendamisel - Spyder 3.0.0 (https://pythonhosted.org/spyder/installation.html)
 Anaconda 4.2.0 (https://www.continuum.io/downloads)
-
-Vajalik paigaldada pakett dlib ('pip install dlib' käivitada nt kaustas ..\Anaconda3\Scripts).
-
-Vajalik paigaldada pakett exifread ('pip install exifread' käivitada nt kaustas ..\Anaconda3\Scripts).
-
-Vajalik teha pip install flask ja pip install flask-restplus
-
 
 
 # Käesolevalt toimuvad järgmised kontrollid (True/False):
