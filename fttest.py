@@ -22,7 +22,7 @@ class TestMethods(unittest.TestCase):
         self.assertFalse(result)
         
     def test_checkPhotoDimensionsTrue(self):
-        img3 = misc.imread("images/Test/2010_0213canada0002fx.jpg ")
+        img3 = misc.imread("images/Test/2010_0213canada0002fx.jpg")
         result = checkPhotoDimensions(img3)
         self.assertTrue(result)
 
