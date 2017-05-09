@@ -14,7 +14,7 @@ Anaconda 4.2.0 (https://www.continuum.io/downloads)
 2. Kas on tegu värvifotoga
 3. Foto üldheleduse kontroll
 4. Exif andmete olemasolu puhul foto kuupäeva kontroll
-5. Leitud nägude arv (Kui leitakse rohkem nägusid kui üks, siis praegu uuritakse neid edasi, reaalses projektis on otstarbekas edasine uurimine lõpetada).
+5. Leitud nägude arv
 
 # Näo kontrollid:
 1. Kas nägu on keskel
